@@ -7,7 +7,16 @@ server:
 spring:
   application:
     name: reusebook-backend
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
 logging:
   level:
     root: info
     com.reusebook: debug
+
+reusebook:
+  storage:
+    image-dir: ${REUSEBOOK_IMAGE_DIR:uploads}
+    public-url-prefix: /uploads/

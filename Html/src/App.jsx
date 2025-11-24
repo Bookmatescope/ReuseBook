@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage.jsx';
 
 const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'));
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
+const UploadPage = lazy(() => import('./pages/UploadPage.jsx'));
 
 export default function App() {
   // Suspense 用于在异步加载页面时提供统一的回退提示
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
         </Route>
+        <Route path="/upload" element={<UploadPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

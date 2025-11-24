@@ -14,6 +14,9 @@ export default function LandingPage() {
           <Link className="secondary-btn" to="/login">
             已有账号？登录
           </Link>
+          <Link className="ghost-btn" to="/upload">
+            快速上传封面
+          </Link>
         </div>
       </section>
     </div>

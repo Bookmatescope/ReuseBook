@@ -153,7 +153,8 @@ a:hover {
 }
 
 .primary-btn,
-.secondary-btn {
+.secondary-btn,
+.ghost-btn {
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -189,6 +190,16 @@ a:hover {
   background: rgba(37, 99, 235, 0.1);
 }
 
+.ghost-btn {
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  background: transparent;
+}
+
+.ghost-btn:hover {
+  background: rgba(15, 23, 42, 0.05);
+}
+
 .landing {
   min-height: 100vh;
   display: flex;
@@ -218,6 +229,65 @@ a:hover {
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 4rem 1.5rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.upload-page .page-header {
+  text-align: center;
+}
+
+.uploader-card {
+  background: #fff;
+  margin-top: 2rem;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.uploader-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.uploader-field input[type='file'] {
+  border: 1px dashed #94a3b8;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.uploader-field input[type='text'],
+.uploader-field input[type='search'],
+.uploader-field input[type='number'] {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5f5;
+}
+
+.uploader-preview {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.uploader-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
 }
 
 @media (max-width: 860px) {
