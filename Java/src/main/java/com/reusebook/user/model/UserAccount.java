@@ -3,6 +3,9 @@ package com.reusebook.user.model;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * 用户领域模型：用于存储账号核心信息
+ */
 public record UserAccount(
         UUID id,
         String email,

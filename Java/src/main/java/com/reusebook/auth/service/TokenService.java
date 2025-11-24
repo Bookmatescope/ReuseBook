@@ -9,12 +9,18 @@ import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.Base64;
 
+/**
+ * 自定义 Token 服务：负责签发与校验简单的 HMAC Token
+ */
 @Component
 public class TokenService {
 
     private static final String ALGORITHM = "HmacSHA256";
     private static final String SECRET = "reusebook-alpha-day1-demo-secret";
 
+    /**
+     * 签发 Token：将 subject 与签发时间组合后加签
+     */
     public String issueToken(String subject) {
         long issuedEpoch = Instant.now().getEpochSecond();
         String payload = subject + ":" + issuedEpoch;
@@ -23,6 +29,9 @@ public class TokenService {
                 .encodeToString((payload + ":" + signature).getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * 校验 Token：检查结构、签名并返回载荷
+     */
     public TokenPayload verify(String token) {
         try {
             String decoded = new String(Base64.getUrlDecoder().decode(token), StandardCharsets.UTF_8);
@@ -41,6 +50,9 @@ public class TokenService {
         }
     }
 
+    /**
+     * HMAC-SHA256 签名工具方法
+     */
     private String sign(String payload) {
         try {
             Mac mac = Mac.getInstance(ALGORITHM);

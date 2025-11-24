@@ -1,3 +1,4 @@
+// 认证布局：提供统一的标题、导航以及内容区域
 import { NavLink, Outlet } from 'react-router-dom';
 
 export default function AuthLayout() {

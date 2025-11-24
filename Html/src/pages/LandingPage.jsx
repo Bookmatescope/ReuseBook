@@ -1,3 +1,4 @@
+// 着陆页：向新用户展示项目价值并提供注册/登录入口
 import { Link } from 'react-router-dom';
 
 export default function LandingPage() {

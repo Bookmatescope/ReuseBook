@@ -11,6 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+/**
+ * 用户服务单测：覆盖注册/登录主流程与重复注册异常
+ */
 class UserServiceTest {
 
     private UserService userService;

@@ -1,3 +1,4 @@
+// Vite 配置：启用 React 插件并配置后端代理
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 

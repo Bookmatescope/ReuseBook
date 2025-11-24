@@ -1,3 +1,4 @@
+// 登录页面：处理凭证提交与 Token 持久化
 import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AuthForm from '../components/forms/AuthForm.jsx';
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [prefillEmail, setPrefillEmail] = useState('');
 
   useEffect(() => {
+    // 若注册页跳转带上邮箱则自动填入
     if (location.state?.email) {
       setPrefillEmail(location.state.email);
     }
@@ -31,11 +33,13 @@ export default function LoginPage() {
         });
 
         if (!response.ok) {
+          // 登录失败提示尽量展示后端返回信息
           const body = await response.json().catch(() => ({}));
           throw new Error(body.message || '登录失败，请检查账号或密码');
         }
 
         const data = await response.json();
+        // 将 token 与用户信息存入本地，便于后续接口鉴权
         localStorage.setItem('reusebook_token', data.token);
         localStorage.setItem('reusebook_profile', JSON.stringify(data.profile));
         navigate('/', { replace: true });

@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 内存实现：用于 Alpha 阶段快速验证流程
+ */
 @Repository
 public class InMemoryUserRepository implements UserRepository {
 

@@ -1,3 +1,4 @@
+# 服务基础配置：指定端口与日志级别
 server:
   port: 8081
   servlet:

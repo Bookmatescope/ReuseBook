@@ -4,6 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 注册请求体：包含邮箱、昵称与密码等必填字段
+ */
 public record RegisterRequest(
         @Email(message = "邮箱格式不正确")
         @NotBlank(message = "邮箱不能为空")

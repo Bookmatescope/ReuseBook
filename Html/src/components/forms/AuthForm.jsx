@@ -1,6 +1,8 @@
+// 通用认证表单：根据 mode 切换注册/登录字段
 import { useForm } from 'react-hook-form';
 
 export default function AuthForm({ mode = 'register', onSubmit, isSubmitting, defaultValues = {} }) {
+  // useForm 负责收集输入值与校验状态
   const {
     register,
     handleSubmit,
@@ -8,6 +10,7 @@ export default function AuthForm({ mode = 'register', onSubmit, isSubmitting, de
   } = useForm({ defaultValues });
 
   const renderPasswordHint = () => (
+    // 密码强度提示仅在无报错时展示
     <p className="field-hint">密码需包含至少 8 位字符，建议包含字母和数字</p>
   );
 

@@ -21,6 +21,7 @@
 
     <name>reusebook-backend</name>
 
+    <!-- 项目依赖：Web、校验、安全与测试组件 -->
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

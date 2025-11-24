@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * 用户服务：封装注册、登录与 token 校验的业务逻辑
+ */
 @Service
 public class UserService {
 
@@ -29,6 +32,9 @@ public class UserService {
         this.tokenService = tokenService;
     }
 
+    /**
+     * 注册新用户，并确保邮箱唯一
+     */
     public UserProfile register(RegisterRequest request) {
         userRepository.findByEmail(request.email()).ifPresent(existing -> {
             throw new BusinessException(HttpStatus.CONFLICT, "该邮箱已注册");
@@ -44,6 +50,9 @@ public class UserService {
         return toProfile(user);
     }
 
+    /**
+     * 登录：校验密码并返回 token
+     */
     public AuthResponse login(LoginRequest request) {
         UserAccount user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException(HttpStatus.UNAUTHORIZED, "邮箱或密码错误"));
@@ -54,6 +63,9 @@ public class UserService {
         return new AuthResponse(token, toProfile(user));
     }
 
+    /**
+     * 校验 token 并返回用户资料
+     */
     public UserProfile verify(String token) {
         TokenPayload payload;
         try {
@@ -66,6 +78,9 @@ public class UserService {
         return toProfile(user);
     }
 
+    /**
+     * 内部转换方法，保证返回字段一致
+     */
     private UserProfile toProfile(UserAccount user) {
         return new UserProfile(user.id(), user.email(), user.nickname(), user.createdAt());
     }
