@@ -69,6 +69,24 @@ public class BookService {
                 .toList();
     }
 
+    /**
+     * 获取全量书籍列表
+     */
+    public List<BookResponse> findAll() {
+        return bookRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
+     * 根据 ID 获取书籍详情
+     */
+    public BookResponse findById(UUID id) {
+        return bookRepository.findById(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "书籍不存在"));
+    }
+
     private String pickValue(String preferred, String fallback, String defaultValue) {
         if (preferred != null && !preferred.isBlank()) {
             return preferred;

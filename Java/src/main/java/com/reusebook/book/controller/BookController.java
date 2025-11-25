@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 书籍接口：涵盖 ISBN 查询与书籍上架
@@ -35,6 +36,22 @@ public class BookController {
     @GetMapping("/isbn/{isbn}/info")
     public ResponseEntity<IsbnLookupResponse> isbnInfo(@PathVariable String isbn) {
         return ResponseEntity.ok(bookService.lookupByIsbn(isbn));
+    }
+
+    /**
+     * 获取全量书籍列表
+     */
+    @GetMapping
+    public ResponseEntity<List<BookResponse>> list() {
+        return ResponseEntity.ok(bookService.findAll());
+    }
+
+    /**
+     * 获取单本书籍详情
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<BookResponse> detail(@PathVariable UUID id) {
+        return ResponseEntity.ok(bookService.findById(id));
     }
 
     /**

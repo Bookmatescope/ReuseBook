@@ -83,4 +83,29 @@ class BookServiceTest {
         var books = bookService.findByIsbn("9787115428028");
         assertThat(books).hasSize(2);
     }
+
+    @Test
+    void should_find_all_books() {
+        bookService.create(new CreateBookRequest("9787115428028", "a@test.com", new BigDecimal("20"), "八成新", null, null, null));
+        bookService.create(new CreateBookRequest("9787111544937", "b@test.com", new BigDecimal("30"), "全新", null, null, null));
+
+        var all = bookService.findAll();
+        assertThat(all).hasSize(2);
+    }
+
+    @Test
+    void should_find_book_by_id() {
+        var created = bookService.create(new CreateBookRequest("9787115428028", "seller@test.com", new BigDecimal("18"), "九成新", null, null, null));
+
+        var found = bookService.findById(created.id());
+        assertThat(found.isbn()).isEqualTo("9787115428028");
+        assertThat(found.sellerEmail()).isEqualTo("seller@test.com");
+    }
+
+    @Test
+    void should_throw_when_book_id_not_found() {
+        assertThatThrownBy(() -> bookService.findById(java.util.UUID.randomUUID()))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("书籍不存在");
+    }
 }
