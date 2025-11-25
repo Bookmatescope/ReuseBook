@@ -51,4 +51,36 @@ class BookServiceTest {
         assertThatThrownBy(() -> bookService.lookupByIsbn("000"))
                 .isInstanceOf(BusinessException.class);
     }
+
+    @Test
+    void should_create_book_with_custom_title_and_author() {
+        CreateBookRequest request = new CreateBookRequest(
+                "9787111544937",
+                "another@example.com",
+                new BigDecimal("28.00"),
+                "八成新",
+                "自定义书名",
+                "自定义作者",
+                "这是自定义简介"
+        );
+        var response = bookService.create(request);
+        assertThat(response.title()).isEqualTo("自定义书名");
+        assertThat(response.author()).isEqualTo("自定义作者");
+        assertThat(response.description()).isEqualTo("这是自定义简介");
+    }
+
+    @Test
+    void should_return_empty_list_when_isbn_not_exists() {
+        var books = bookService.findByIsbn("0000000000000");
+        assertThat(books).isEmpty();
+    }
+
+    @Test
+    void should_find_multiple_books_by_same_isbn() {
+        bookService.create(new CreateBookRequest("9787115428028", "seller1@example.com", new BigDecimal("30"), "九成新", null, null, null));
+        bookService.create(new CreateBookRequest("9787115428028", "seller2@example.com", new BigDecimal("25"), "全新", null, null, null));
+
+        var books = bookService.findByIsbn("9787115428028");
+        assertThat(books).hasSize(2);
+    }
 }
