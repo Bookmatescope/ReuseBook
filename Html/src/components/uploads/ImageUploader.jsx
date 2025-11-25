@@ -1,7 +1,11 @@
 // 图片上传组件：封装文件选择、预览与上传状态
 import { useCallback, useMemo, useState } from 'react';
 
-export default function ImageUploader() {
+export default function ImageUploader({
+  title = '封面图片上传',
+  subtitle = '支持 PNG/JPEG/WebP，大小不超过 5MB',
+  onUploaded
+}) {
   const [file, setFile] = useState(null);
   const [category, setCategory] = useState('book-cover');
   const [previewUrl, setPreviewUrl] = useState('');
@@ -51,6 +55,9 @@ export default function ImageUploader() {
       }
       const result = await response.json();
       setMessage({ type: 'success', text: `上传成功，访问地址：${result.url}` });
+      if (typeof onUploaded === 'function') {
+        onUploaded(result);
+      }
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
     } finally {
@@ -61,8 +68,8 @@ export default function ImageUploader() {
   return (
     <div className="uploader-card">
       <header>
-        <h2>封面图片上传</h2>
-        <p>支持 PNG/JPEG/WebP，大小不超过 5MB</p>
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
       </header>
       <div className="uploader-field">
         <label htmlFor="category">图片分类</label>

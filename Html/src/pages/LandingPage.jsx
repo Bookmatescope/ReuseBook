@@ -17,6 +17,9 @@ export default function LandingPage() {
           <Link className="ghost-btn" to="/upload">
             快速上传封面
           </Link>
+          <Link className="ghost-btn" to="/publish">
+            发布二手书
+          </Link>
         </div>
       </section>
     </div>
