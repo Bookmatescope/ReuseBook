@@ -20,6 +20,9 @@ export default function LandingPage() {
           <Link className="ghost-btn" to="/publish">
             发布二手书
           </Link>
+          <Link className="ghost-btn" to="/books">
+            浏览书籍
+          </Link>
         </div>
       </section>
     </div>
