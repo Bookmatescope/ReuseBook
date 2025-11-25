@@ -3,6 +3,7 @@ package com.reusebook.auth.controller;
 import com.reusebook.auth.dto.AuthResponse;
 import com.reusebook.auth.dto.LoginRequest;
 import com.reusebook.auth.dto.RegisterRequest;
+import com.reusebook.auth.dto.RefreshTokenRequest;
 import com.reusebook.auth.dto.UserProfile;
 import com.reusebook.auth.service.UserService;
 import jakarta.validation.Valid;
@@ -44,6 +45,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(userService.login(request));
+    }
+
+    /**
+     * 刷新 Token：延长登录状态
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(userService.refresh(request.token()));
     }
 
     /**

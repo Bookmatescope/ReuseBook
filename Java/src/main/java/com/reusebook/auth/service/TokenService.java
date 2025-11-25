@@ -17,13 +17,15 @@ public class TokenService {
 
     private static final String ALGORITHM = "HmacSHA256";
     private static final String SECRET = "reusebook-alpha-day1-demo-secret";
+    private static final long EXPIRES_IN_SECONDS = 7 * 24 * 60 * 60;
 
     /**
      * 签发 Token：将 subject 与签发时间组合后加签
      */
     public String issueToken(String subject) {
         long issuedEpoch = Instant.now().getEpochSecond();
-        String payload = subject + ":" + issuedEpoch;
+        long expiresEpoch = issuedEpoch + EXPIRES_IN_SECONDS;
+        String payload = subject + ":" + issuedEpoch + ":" + expiresEpoch;
         String signature = sign(payload);
         return Base64.getUrlEncoder().withoutPadding()
                 .encodeToString((payload + ":" + signature).getBytes(StandardCharsets.UTF_8));
@@ -36,18 +38,32 @@ public class TokenService {
         try {
             String decoded = new String(Base64.getUrlDecoder().decode(token), StandardCharsets.UTF_8);
             String[] parts = decoded.split(":");
-            if (parts.length != 3) {
+            if (parts.length != 4) {
                 throw new IllegalArgumentException("invalid token structure");
             }
-            String payload = parts[0] + ":" + parts[1];
+            long expiresEpoch = Long.parseLong(parts[2]);
+            if (Instant.now().getEpochSecond() >= expiresEpoch) {
+                throw new IllegalArgumentException("token 已过期");
+            }
+            String payload = parts[0] + ":" + parts[1] + ":" + parts[2];
             String expectedSignature = sign(payload);
-            if (!expectedSignature.equals(parts[2])) {
+            if (!expectedSignature.equals(parts[3])) {
                 throw new IllegalArgumentException("invalid token signature");
             }
-            return new TokenPayload(parts[0], Instant.ofEpochSecond(Long.parseLong(parts[1])));
+            return new TokenPayload(parts[0],
+                    Instant.ofEpochSecond(Long.parseLong(parts[1])),
+                    Instant.ofEpochSecond(expiresEpoch));
         } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("token 无效", ex);
+            throw new IllegalArgumentException(ex.getMessage(), ex);
         }
+    }
+
+    /**
+     * 刷新 Token：校验后重新签发
+     */
+    public String refresh(String token) {
+        TokenPayload payload = verify(token);
+        return issueToken(payload.subject());
     }
 
     /**

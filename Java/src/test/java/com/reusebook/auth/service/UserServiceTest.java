@@ -70,4 +70,25 @@ class UserServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Token 无效");
     }
+
+    @Test
+    void should_refresh_token_successfully() {
+        userService.register(TestUserData.registerRequest());
+        var auth = userService.login(TestUserData.loginRequest());
+
+        var refreshed = userService.refresh(auth.token());
+
+        assertThat(refreshed.token()).isNotBlank();
+        assertThat(refreshed.profile().email()).isEqualTo(TestUserData.email());
+        assertThat(userService.verify(refreshed.token()).email()).isEqualTo(TestUserData.email());
+    }
+
+    @Test
+    void should_fail_to_refresh_when_token_invalid() {
+        userService.register(TestUserData.registerRequest());
+
+        assertThatThrownBy(() -> userService.refresh("invalid-token"))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("Token 无效");
+    }
 }

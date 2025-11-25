@@ -79,6 +79,22 @@ public class UserService {
     }
 
     /**
+     * 刷新 Token：复用原有凭证签发新的访问令牌
+     */
+    public AuthResponse refresh(String token) {
+        TokenPayload payload;
+        try {
+            payload = tokenService.verify(token);
+        } catch (IllegalArgumentException ex) {
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "Token 无效");
+        }
+        UserAccount user = userRepository.findByEmail(payload.subject())
+                .orElseThrow(() -> new BusinessException(HttpStatus.UNAUTHORIZED, "用户不存在"));
+        String refreshed = tokenService.issueToken(user.email());
+        return new AuthResponse(refreshed, toProfile(user));
+    }
+
+    /**
      * 内部转换方法，保证返回字段一致
      */
     private UserProfile toProfile(UserAccount user) {
