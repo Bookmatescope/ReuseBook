@@ -548,3 +548,50 @@ a:hover {
   background: #1d4ed8;
 }
 
+/* 搜索栏 */
+.search-bar {
+  margin-bottom: 1.5rem;
+}
+
+.search-bar input {
+  width: 100%;
+  max-width: 480px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #cbd5f5;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+.search-bar input:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* 分页 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5f5;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
