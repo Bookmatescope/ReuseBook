@@ -87,6 +87,23 @@ public class BookService {
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "书籍不存在"));
     }
 
+    /**
+     * 书籍搜索：支持按关键字模糊匹配标题、作者、ISBN
+     */
+    public List<BookResponse> search(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return findAll();
+        }
+        String lowerKeyword = keyword.toLowerCase();
+        return bookRepository.findAll().stream()
+                .filter(book -> 
+                    book.title().toLowerCase().contains(lowerKeyword) ||
+                    book.author().toLowerCase().contains(lowerKeyword) ||
+                    book.isbn().contains(keyword.replaceAll("[- ]", "")))
+                .map(this::toResponse)
+                .toList();
+    }
+
     private String pickValue(String preferred, String fallback, String defaultValue) {
         if (preferred != null && !preferred.isBlank()) {
             return preferred;

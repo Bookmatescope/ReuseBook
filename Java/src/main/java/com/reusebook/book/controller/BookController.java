@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -44,6 +45,14 @@ public class BookController {
     @GetMapping
     public ResponseEntity<List<BookResponse>> list() {
         return ResponseEntity.ok(bookService.findAll());
+    }
+
+    /**
+     * 书籍搜索：按关键字模糊匹配
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<BookResponse>> search(@RequestParam(required = false) String keyword) {
+        return ResponseEntity.ok(bookService.search(keyword));
     }
 
     /**
