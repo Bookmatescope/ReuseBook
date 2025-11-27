@@ -112,6 +112,7 @@
       "price": 35.00,
       "condition": "九成新",
       "sellerEmail": "seller@reusebook.cn",
+      "meetupLocation": "图书馆一楼大厅",
       "createdAt": "2025-11-25T10:00:00Z"
     }
   ]
@@ -138,6 +139,7 @@
       "price": 35.00,
       "condition": "九成新",
       "sellerEmail": "seller@reusebook.cn",
+      "meetupLocation": "图书馆一楼大厅",
       "createdAt": "2025-11-25T10:00:00Z"
     }
   ]
@@ -154,9 +156,11 @@
     "description": "无批注",
     "price": 25.0,
     "condition": "九成新",
-    "sellerEmail": "seller@reusebook.cn"
+    "sellerEmail": "seller@reusebook.cn",
+    "meetupLocation": "图书馆一楼大厅"
   }
   ```
+- **说明**：`meetupLocation`（面交地址）为必填字段，卖家需提供面交地点。
 - **响应 201 Created**：返回 `BookResponse`。
 
 ---
@@ -289,6 +293,8 @@
 
 ## 5. 订单模块 `/api/orders`
 
+> **交易模式说明**：本系统采用面交模式，买家下单后卖家确认，双方约定时间地点当面交易。
+
 ### 5.1 创建订单 `POST /api/orders`
 
 - **请求头**：`Authorization: Bearer <token>`
@@ -325,6 +331,8 @@
 ### 5.2 获取订单列表 `GET /api/orders`
 
 - **请求头**：`Authorization: Bearer <token>`
+- **查询参数**：`status`（可选，按订单状态筛选）
+  - 可选值：`PENDING`（待确认）、`CONFIRMED`（已确认）、`MEETUP`（面交中）、`COMPLETED`（已完成）、`CANCELLED`（已取消）
 - **响应 200 OK**：返回当前用户所有订单数组。
 
 ### 5.3 获取订单详情 `GET /api/orders/{orderId}`
@@ -332,6 +340,32 @@
 - **请求头**：`Authorization: Bearer <token>`
 - **响应 200 OK**：返回 `OrderResponse`。
 - **失败**：`404 NOT_FOUND`（订单不存在）、`403 FORBIDDEN`（无权查看）。
+
+### 5.4 更新订单状态 `PATCH /api/orders/{orderId}/status`
+
+- **请求头**：`Authorization: Bearer <token>`
+- **请求体**
+  ```json
+  {
+    "status": "CONFIRMED"
+  }
+  ```
+- **响应 200 OK**：返回更新后的 `OrderResponse`。
+- **状态流转规则**（面交模式）：
+  ```
+  PENDING → CONFIRMED → MEETUP → COMPLETED
+      ↓         ↓          ↓
+    CANCELLED CANCELLED  CANCELLED
+  ```
+  - `PENDING`（待确认）：买家下单后初始状态
+  - `CONFIRMED`（已确认）：卖家确认订单，约定面交时间地点
+  - `MEETUP`（面交中）：双方约定见面交易
+  - `COMPLETED`（已完成）：交易成功
+  - `CANCELLED`（已取消）：任一方取消订单
+- **失败**：
+  - `404 NOT_FOUND`（订单不存在）
+  - `403 FORBIDDEN`（无权操作）
+  - `400 BAD_REQUEST`（非法状态流转）
 
 ---
 
