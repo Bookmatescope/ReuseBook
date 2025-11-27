@@ -16,6 +16,7 @@ public record Book(
         BigDecimal price,
         String condition,
         String sellerEmail,
+        String meetupLocation,  // 面交地址（卖家提供）
         Instant createdAt
 ) {
 }

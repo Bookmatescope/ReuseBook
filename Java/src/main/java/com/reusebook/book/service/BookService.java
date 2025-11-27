@@ -54,6 +54,7 @@ public class BookService {
                 request.price(),
                 request.condition(),
                 request.sellerEmail(),
+                request.meetupLocation(),
                 Instant.now()
         );
         bookRepository.save(book);
@@ -122,15 +123,16 @@ public class BookService {
     }
 
     private BookResponse toResponse(Book book) {
-    return new BookResponse(
+        return new BookResponse(
                 book.id(),
                 book.isbn(),
                 book.title(),
                 book.author(),
                 book.description(),
-        book.price().setScale(2, RoundingMode.HALF_UP),
+                book.price().setScale(2, RoundingMode.HALF_UP),
                 book.condition(),
                 book.sellerEmail(),
+                book.meetupLocation(),
                 book.createdAt()
         );
     }

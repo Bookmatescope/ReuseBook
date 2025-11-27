@@ -16,6 +16,7 @@ public record BookResponse(
         BigDecimal price,
         String condition,
         String sellerEmail,
+        String meetupLocation,  // 面交地址
         Instant createdAt
 ) {
 }

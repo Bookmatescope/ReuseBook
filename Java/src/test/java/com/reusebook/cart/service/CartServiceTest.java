@@ -39,6 +39,7 @@ class CartServiceTest {
                 new BigDecimal("35.00"),
                 "九成新",
                 "seller@reusebook.cn",
+                "图书馆一楼",
                 Instant.now()
         );
         bookRepository.save(book);

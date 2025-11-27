@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 /**
- * 创建书籍请求：包含 ISBN、售价、成色与卖家信息
+ * 创建书籍请求：包含 ISBN、售价、成色、卖家信息与面交地址
  */
 public record CreateBookRequest(
         @NotBlank(message = "ISBN 不能为空")
@@ -29,6 +29,9 @@ public record CreateBookRequest(
 
         String title,
         String author,
-        String description
+        String description,
+
+        @NotBlank(message = "面交地址不能为空")
+        String meetupLocation  // 面交地址（卖家提供，如"西门广场"、"图书馆一楼"）
 ) {
 }
