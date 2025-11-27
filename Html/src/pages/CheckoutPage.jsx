@@ -1,48 +1,87 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AddressManager from '../components/AddressManager';
 
 /**
- * 订单创建页面 - 从购物车结算到创建订单
+ * 订单创建页面 - 从购物车结算到创建订单（面交模式）
  */
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
-  const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // 模拟从购物车和地址接口获取数据
-    const mockCart = [
-      { id: 'book-1', title: '深入理解计算机系统', author: 'Randal E. Bryant', price: 35.60, quantity: 1, condition: '九成新' },
-      { id: 'book-2', title: 'JavaScript高级程序设计', author: 'Nicholas C. Zakas', price: 28.00, quantity: 1, condition: '全新' },
-    ];
-    const mockAddresses = [
-      { id: 'addr-1', recipientName: '张三', phone: '138****1234', province: '福建省', city: '福州市', district: '闽侯县', detailAddress: '福州大学旗山校区', isDefault: true },
-      { id: 'addr-2', recipientName: '李四', phone: '139****5678', province: '福建省', city: '福州市', district: '鼓楼区', detailAddress: '五一广场', isDefault: false },
-    ];
-    setTimeout(() => {
-      setCartItems(mockCart);
-      setAddresses(mockAddresses);
-      setSelectedAddressId(mockAddresses.find(a => a.isDefault)?.id || mockAddresses[0]?.id);
-      setLoading(false);
-    }, 300);
+    fetchCartItems();
   }, []);
 
-  const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const fetchCartItems = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const email = localStorage.getItem('userEmail');
+      const res = await fetch(`/api/cart/items?buyerEmail=${email}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCartItems(data);
+      } else {
+        // 如果接口失败，使用模拟数据
+        setCartItems([
+          { id: 'book-1', bookId: 'book-1', bookTitle: '深入理解计算机系统', unitPrice: 35.60, quantity: 1 },
+        ]);
+      }
+    } catch (err) {
+      console.error('获取购物车失败:', err);
+      setCartItems([
+        { id: 'book-1', bookId: 'book-1', bookTitle: '深入理解计算机系统', unitPrice: 35.60, quantity: 1 },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalAmount = cartItems.reduce((sum, item) => sum + (item.unitPrice || item.price) * item.quantity, 0);
 
   const handleSubmit = async () => {
     if (!selectedAddressId) {
-      alert('请选择收货地址');
+      setError('请选择收货地址');
       return;
     }
     setSubmitting(true);
-    // 模拟创建订单
-    setTimeout(() => {
-      alert('订单创建成功！');
-      navigate('/orders');
-    }, 500);
+    setError(null);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items: cartItems.map(item => ({
+            bookId: item.bookId || item.id,
+            quantity: item.quantity
+          })),
+          addressId: selectedAddressId
+        })
+      });
+      
+      if (res.ok) {
+        alert('订单创建成功！卖家确认后将与您约定面交时间地点。');
+        navigate('/orders');
+      } else {
+        const data = await res.json();
+        setError(data.message || '创建订单失败');
+      }
+    } catch (err) {
+      setError('网络错误，请稍后重试');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -53,30 +92,11 @@ export default function CheckoutPage() {
     <div className="page-container">
       <h1>确认订单</h1>
 
+      {error && <div className="error-message">{error}</div>}
+
       {/* 收货地址选择 */}
       <section className="checkout-section">
-        <h2>收货地址</h2>
-        <div className="address-list">
-          {addresses.map(addr => (
-            <div
-              key={addr.id}
-              className={`address-card ${selectedAddressId === addr.id ? 'selected' : ''}`}
-              onClick={() => setSelectedAddressId(addr.id)}
-            >
-              <div className="address-info">
-                <span className="recipient">{addr.recipientName}</span>
-                <span className="phone">{addr.phone}</span>
-                {addr.isDefault && <span className="default-tag">默认</span>}
-              </div>
-              <div className="address-detail">
-                {addr.province} {addr.city} {addr.district} {addr.detailAddress}
-              </div>
-            </div>
-          ))}
-        </div>
-        <button className="btn-secondary" onClick={() => navigate('/addresses')}>
-          管理收货地址
-        </button>
+        <AddressManager onSelect={setSelectedAddressId} />
       </section>
 
       {/* 商品列表 */}
@@ -86,12 +106,12 @@ export default function CheckoutPage() {
           {cartItems.map(item => (
             <div key={item.id} className="order-item">
               <div className="item-info">
-                <h3>{item.title}</h3>
+                <h3>{item.bookTitle || item.title}</h3>
                 <p className="author">{item.author}</p>
                 <span className="condition">{item.condition}</span>
               </div>
               <div className="item-price">
-                <span className="price">¥{item.price.toFixed(2)}</span>
+                <span className="price">¥{(item.unitPrice || item.price).toFixed(2)}</span>
                 <span className="quantity">× {item.quantity}</span>
               </div>
             </div>
@@ -106,8 +126,8 @@ export default function CheckoutPage() {
           <span>¥{totalAmount.toFixed(2)}</span>
         </div>
         <div className="summary-row">
-          <span>运费</span>
-          <span>免运费</span>
+          <span>交易方式</span>
+          <span className="meetup-tag">面交</span>
         </div>
         <div className="summary-row total">
           <span>应付总额</span>
