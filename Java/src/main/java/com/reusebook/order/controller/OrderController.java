@@ -3,6 +3,8 @@ package com.reusebook.order.controller;
 import com.reusebook.auth.service.TokenService;
 import com.reusebook.order.dto.CreateOrderRequest;
 import com.reusebook.order.dto.OrderResponse;
+import com.reusebook.order.dto.UpdateOrderStatusRequest;
+import com.reusebook.order.model.OrderStatus;
 import com.reusebook.order.service.OrderService;
 import com.reusebook.user.service.ProfileService;
 import jakarta.validation.Valid;
@@ -46,8 +48,13 @@ public class OrderController {
      * 获取用户订单列表
      */
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> list(@RequestHeader HttpHeaders headers) {
+    public ResponseEntity<List<OrderResponse>> list(
+            @RequestHeader HttpHeaders headers,
+            @RequestParam(required = false) OrderStatus status) {
         UUID userId = extractUserId(headers);
+        if (status != null) {
+            return ResponseEntity.ok(orderService.getOrdersByStatus(userId, status));
+        }
         return ResponseEntity.ok(orderService.getOrders(userId));
     }
 
@@ -60,6 +67,18 @@ public class OrderController {
             @PathVariable UUID orderId) {
         UUID userId = extractUserId(headers);
         return ResponseEntity.ok(orderService.getOrder(userId, orderId));
+    }
+
+    /**
+     * 更新订单状态（面交流程）
+     */
+    @PatchMapping("/{orderId}/status")
+    public ResponseEntity<OrderResponse> updateStatus(
+            @RequestHeader HttpHeaders headers,
+            @PathVariable UUID orderId,
+            @Valid @RequestBody UpdateOrderStatusRequest request) {
+        UUID userId = extractUserId(headers);
+        return ResponseEntity.ok(orderService.updateStatus(userId, orderId, request.status()));
     }
 
     private UUID extractUserId(HttpHeaders headers) {

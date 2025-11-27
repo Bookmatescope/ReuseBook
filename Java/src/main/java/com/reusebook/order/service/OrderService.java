@@ -75,6 +75,16 @@ public class OrderService {
     }
 
     /**
+     * 按状态查询用户订单
+     */
+    public List<OrderResponse> getOrdersByStatus(UUID userId, OrderStatus status) {
+        return orderRepository.findByUserId(userId).stream()
+                .filter(order -> order.status() == status)
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
      * 获取订单详情
      */
     public OrderResponse getOrder(UUID userId, UUID orderId) {
@@ -84,6 +94,60 @@ public class OrderService {
             throw new BusinessException(HttpStatus.FORBIDDEN, "无权查看此订单");
         }
         return toResponse(order);
+    }
+
+    /**
+     * 更新订单状态（面交流程）
+     * PENDING -> CONFIRMED -> MEETUP -> COMPLETED
+     * 任意状态 -> CANCELLED
+     */
+    public OrderResponse updateStatus(UUID userId, UUID orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "订单不存在"));
+        
+        if (!order.userId().equals(userId)) {
+            throw new BusinessException(HttpStatus.FORBIDDEN, "无权操作此订单");
+        }
+        
+        validateStatusTransition(order.status(), newStatus);
+        
+        Order updatedOrder = new Order(
+                order.id(),
+                order.userId(),
+                order.items(),
+                order.addressId(),
+                order.totalAmount(),
+                newStatus,
+                order.createdAt()
+        );
+        orderRepository.save(updatedOrder);
+        return toResponse(updatedOrder);
+    }
+
+    /**
+     * 验证状态流转是否合法
+     */
+    private void validateStatusTransition(OrderStatus current, OrderStatus target) {
+        // 取消订单始终允许（除非已完成或已取消）
+        if (target == OrderStatus.CANCELLED) {
+            if (current == OrderStatus.COMPLETED || current == OrderStatus.CANCELLED) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "当前状态不允许取消");
+            }
+            return;
+        }
+        
+        // 正向流转验证
+        boolean valid = switch (current) {
+            case PENDING -> target == OrderStatus.CONFIRMED;
+            case CONFIRMED -> target == OrderStatus.MEETUP;
+            case MEETUP -> target == OrderStatus.COMPLETED;
+            case COMPLETED, CANCELLED -> false;
+        };
+        
+        if (!valid) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, 
+                    "非法状态流转: " + current + " -> " + target);
+        }
     }
 
     private OrderResponse toResponse(Order order) {
