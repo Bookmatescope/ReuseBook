@@ -11,6 +11,8 @@ const PublishPage = lazy(() => import('./pages/PublishPage.jsx'));
 const BooksPage = lazy(() => import('./pages/BooksPage.jsx'));
 const BookDetailPage = lazy(() => import('./pages/BookDetailPage.jsx'));
 const CartPage = lazy(() => import('./pages/CartPage.jsx'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage.jsx'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage.jsx'));
 
 export default function App() {
   // Suspense 用于在异步加载页面时提供统一的回退提示
@@ -27,6 +29,8 @@ export default function App() {
         <Route path="/books" element={<BooksPage />} />
         <Route path="/books/:id" element={<BookDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
