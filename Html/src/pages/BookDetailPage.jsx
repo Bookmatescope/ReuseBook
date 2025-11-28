@@ -64,6 +64,15 @@ export default function BookDetailPage() {
         <p className="description">{book.description || '暂无描述'}</p>
         <p className="seller">卖家：{book.sellerEmail}</p>
 
+        {/* 面交地址信息 */}
+        {book.meetupLocation && (
+          <div className="meetup-location">
+            <h3>📍 面交地点</h3>
+            <p>{book.meetupLocation}</p>
+            <p className="meetup-tip">下单后请与卖家约定具体面交时间</p>
+          </div>
+        )}
+
         <button className="btn btn-primary" onClick={handleAddToCart}>
           🛒 加入购物车
         </button>
