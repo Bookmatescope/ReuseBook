@@ -190,4 +190,92 @@ class OrderServiceTest {
 
         assertThat(response.addressId()).isEqualTo(addressId);
     }
+
+    // Day5: 面交流程状态流转测试
+
+    @Test
+    void should_update_status_from_pending_to_confirmed() {
+        var order = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId1, 1)), addressId));
+
+        var updated = orderService.updateStatus(buyerId, order.id(), OrderStatus.CONFIRMED);
+
+        assertThat(updated.status()).isEqualTo(OrderStatus.CONFIRMED);
+    }
+
+    @Test
+    void should_update_status_from_confirmed_to_meetup() {
+        var order = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId1, 1)), addressId));
+        orderService.updateStatus(buyerId, order.id(), OrderStatus.CONFIRMED);
+
+        var updated = orderService.updateStatus(buyerId, order.id(), OrderStatus.MEETUP);
+
+        assertThat(updated.status()).isEqualTo(OrderStatus.MEETUP);
+    }
+
+    @Test
+    void should_update_status_from_meetup_to_completed() {
+        var order = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId1, 1)), addressId));
+        orderService.updateStatus(buyerId, order.id(), OrderStatus.CONFIRMED);
+        orderService.updateStatus(buyerId, order.id(), OrderStatus.MEETUP);
+
+        var updated = orderService.updateStatus(buyerId, order.id(), OrderStatus.COMPLETED);
+
+        assertThat(updated.status()).isEqualTo(OrderStatus.COMPLETED);
+    }
+
+    @Test
+    void should_cancel_order_from_pending() {
+        var order = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId1, 1)), addressId));
+
+        var cancelled = orderService.updateStatus(buyerId, order.id(), OrderStatus.CANCELLED);
+
+        assertThat(cancelled.status()).isEqualTo(OrderStatus.CANCELLED);
+    }
+
+    @Test
+    void should_throw_when_invalid_status_transition() {
+        var order = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId1, 1)), addressId));
+
+        // 不能从 PENDING 直接跳到 COMPLETED
+        assertThatThrownBy(() -> orderService.updateStatus(buyerId, order.id(), OrderStatus.COMPLETED))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("非法状态流转");
+    }
+
+    @Test
+    void should_throw_when_cancel_completed_order() {
+        var order = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId1, 1)), addressId));
+        orderService.updateStatus(buyerId, order.id(), OrderStatus.CONFIRMED);
+        orderService.updateStatus(buyerId, order.id(), OrderStatus.MEETUP);
+        orderService.updateStatus(buyerId, order.id(), OrderStatus.COMPLETED);
+
+        assertThatThrownBy(() -> orderService.updateStatus(buyerId, order.id(), OrderStatus.CANCELLED))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("当前状态不允许取消");
+    }
+
+    @Test
+    void should_filter_orders_by_status() {
+        // 创建两个订单
+        var order1 = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId1, 1)), addressId));
+        var order2 = orderService.create(buyerId, new CreateOrderRequest(
+                List.of(new OrderItemRequest(bookId2, 1)), addressId));
+        
+        // 将 order1 确认
+        orderService.updateStatus(buyerId, order1.id(), OrderStatus.CONFIRMED);
+
+        var pendingOrders = orderService.getOrdersByStatus(buyerId, OrderStatus.PENDING);
+        var confirmedOrders = orderService.getOrdersByStatus(buyerId, OrderStatus.CONFIRMED);
+
+        assertThat(pendingOrders).hasSize(1);
+        assertThat(confirmedOrders).hasSize(1);
+        assertThat(confirmedOrders.get(0).id()).isEqualTo(order1.id());
+    }
 }
