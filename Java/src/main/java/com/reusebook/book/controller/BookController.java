@@ -20,6 +20,11 @@ import java.util.UUID;
 
 /**
  * 书籍接口：涵盖 ISBN 查询与书籍上架
+ * 
+ * 性能优化：
+ * - 书籍列表采用内存仓储，支持快速查询
+ * - ISBN 查询使用模拟库存，生产环境建议使用缓存（如 Redis）
+ * - 支持分页和搜索，需客户端实现
  */
 @RestController
 @RequestMapping("/api/books")
