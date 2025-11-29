@@ -390,13 +390,155 @@
 
 ---
 
+## 5. 订单模块 `/api/orders`
+
+### 5.1 创建订单 `POST /api/orders`
+
+- **请求头**：`Authorization: Bearer <token>`
+- **请求体**
+  ```json
+  {
+    "bookId": "book-uuid",
+    "quantity": 1
+  }
+  ```
+- **响应 201 Created**
+  ```json
+  {
+    "id": "order-uuid",
+    "buyerId": "user-uuid",
+    "bookId": "book-uuid",
+    "status": "PENDING",
+    "meetupLocation": "南山区科技园路1号",
+    "createdAt": "2025-11-28T10:15:00Z"
+  }
+  ```
+- **失败**：`404 NOT_FOUND`（书籍不存在）、`400 BAD_REQUEST`（库存不足）
+
+### 5.2 获取订单详情 `GET /api/orders/{orderId}`
+
+- **请求头**：`Authorization: Bearer <token>`
+- **响应 200 OK**
+  ```json
+  {
+    "id": "order-uuid",
+    "buyerId": "user-uuid",
+    "seller": {
+      "id": "user-uuid",
+      "nickname": "书籍卖家"
+    },
+    "book": {
+      "id": "book-uuid",
+      "title": "算法导论",
+      "meetupLocation": "南山区科技园路1号"
+    },
+    "status": "CONFIRMED",
+    "createdAt": "2025-11-28T10:15:00Z",
+    "updatedAt": "2025-11-28T11:20:00Z"
+  }
+  ```
+
+### 5.3 获取用户订单列表 `GET /api/orders?status=PENDING`
+
+- **请求头**：`Authorization: Bearer <token>`
+- **查询参数**：`status` (PENDING, CONFIRMED, MEETUP, COMPLETED, CANCELLED)
+- **响应 200 OK**：返回订单数组，支持分页
+- **失败**：`401 UNAUTHORIZED`（未认证）
+
+### 5.4 更新订单状态 `PATCH /api/orders/{orderId}/status`
+
+- **请求头**：`Authorization: Bearer <token>`
+- **请求体**
+  ```json
+  {
+    "status": "CONFIRMED"
+  }
+  ```
+- **响应 200 OK**：返回更新后的订单
+- **失败**：`403 FORBIDDEN`（无权操作）、`400 BAD_REQUEST`（状态转换非法）
+
+---
+
+## 6. 评价模块 `/api/reviews`
+
+### 6.1 提交书籍评价 `POST /api/reviews`
+
+- **请求头**：`Authorization: Bearer <token>`
+- **请求体**
+  ```json
+  {
+    "orderId": "order-uuid",
+    "rating": 5,
+    "content": "书籍状态很好，卖家很友好"
+  }
+  ```
+- **响应 201 Created**
+  ```json
+  {
+    "id": "review-uuid",
+    "orderId": "order-uuid",
+    "rating": 5,
+    "content": "书籍状态很好，卖家很友好",
+    "createdAt": "2025-11-28T15:30:00Z"
+  }
+  ```
+- **失败**：`404 NOT_FOUND`（订单不存在）、`400 BAD_REQUEST`（评分不在1-5范围、订单未完成）
+
+### 6.2 获取书籍评价列表 `GET /api/reviews/book/{bookId}`
+
+- **响应 200 OK**
+  ```json
+  [
+    {
+      "id": "review-uuid",
+      "rating": 5,
+      "content": "书籍状态很好，卖家很友好",
+      "reviewer": {
+        "id": "user-uuid",
+        "nickname": "满意买家"
+      },
+      "createdAt": "2025-11-28T15:30:00Z"
+    }
+  ]
+  ```
+
+### 6.3 获取书籍平均评分 `GET /api/reviews/book/{bookId}/rating`
+
+- **响应 200 OK**
+  ```json
+  {
+    "bookId": "book-uuid",
+    "averageRating": 4.5,
+    "totalReviews": 8
+  }
+  ```
+
+---
+
 ## 7. 通用说明
 
 | 字段 | 说明 |
 |------|------|
-| `createdAt` / `addedAt` | ISO-8601 UTC 时间，由后端生成 |
+| `createdAt` / `updatedAt` / `addedAt` | ISO-8601 UTC 时间，由后端生成 |
 | `price` / `unitPrice` | 以元为单位，保留两位小数 |
 | `token` | HMAC-SHA256 签名，7 天有效期，支持刷新 |
+| `status` | 订单状态: PENDING(待确认) → CONFIRMED(已确认) → MEETUP(面交中) → COMPLETED(已完成) |
+| `meetupLocation` | 卖家提供的面交地点，由Book.meetupLocation记录 |
+| `rating` | 评分1-5星，仅COMPLETED订单可评价 |
+
+### 订单面交流程
+
+1. **PENDING**: 买家创建订单后的初始状态
+2. **CONFIRMED**: 卖家确认订单，同意进行面交
+3. **MEETUP**: 双方已见面，开始面交过程
+4. **COMPLETED**: 交易完成，买家可提交评价
+5. **CANCELLED**: 任一方取消订单
+
+### 评价限制
+
+- 只有COMPLETED状态的订单才能提交评价
+- 每个订单仅允许提交一条评价
+- 评分必须在1-5范围内
 
 - 所有请求返回 `application/json`，除上传接口外无需特殊 Header。
 - 异常响应统一格式：`{"code": "BUSINESS_ERROR", "message": "具体原因"}`。
