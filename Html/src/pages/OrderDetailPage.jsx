@@ -117,6 +117,14 @@ export default function OrderDetailPage(){
               {updating ? '处理中...' : statusInfo.nextLabel}
             </button>
           )}
+          {order.status === 'COMPLETED' && (
+            <button 
+              className="btn-primary"
+              onClick={() => navigate(`/orders/${order.id}/review`)}
+            >
+              📝 评价此订单
+            </button>
+          )}
           {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
             <button 
               className="btn-danger" 
