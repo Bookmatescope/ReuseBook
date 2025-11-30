@@ -60,11 +60,14 @@ public class ReviewService {
             throw new BusinessException(HttpStatus.CONFLICT, "该订单已评价");
         }
 
+        // 从订单项中获取第一本书的ID（简化处理，假设一个订单对应一本书）
+        UUID bookId = order.items().isEmpty() ? null : order.items().get(0).bookId();
+
         Review review = new Review(
                 UUID.randomUUID(),
                 request.orderId(),
                 reviewerId,
-                order.bookId(),
+                bookId,
                 request.rating(),
                 request.content() != null ? request.content() : "",
                 Instant.now()
