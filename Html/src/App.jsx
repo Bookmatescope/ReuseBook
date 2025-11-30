@@ -1,6 +1,6 @@
 // 根组件：集中配置路由以及延迟加载的页面组件
+import React, { Suspense, lazy, useState, useCallback } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { Suspense, lazy, useState, useCallback, useMemo } from 'react';
 import AuthLayout from './components/forms/AuthLayout.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 
@@ -22,7 +22,6 @@ import LandingPage from './pages/LandingPage.jsx';
  * 
  * 4. 组件记忆化:
  *    - 使用 React.memo 避免不必要的重渲染
- *    - useMemo 缓存路由配置
  * 
  * 5. 性能监控:
  *    - 跟踪页面加载状态
@@ -47,9 +46,8 @@ const ProfilePage = lazy(() => import('./pages/ProfilePage.jsx'));
 
 /**
  * 加载骨架屏 - 在Suspense边界显示
- * 优化: 使用memo避免不必要重渲染
  */
-const PageSkeleton = React.memo(() => (
+const PageSkeleton = () => (
   <div className="loading-skeleton">
     <div className="skeleton-header"></div>
     <div className="skeleton-content">
@@ -58,7 +56,7 @@ const PageSkeleton = React.memo(() => (
       <div className="skeleton-line"></div>
     </div>
   </div>
-));
+);
 
 const LoadingFallback = () => (
   <div className="loading">
