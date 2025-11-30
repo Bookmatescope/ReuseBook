@@ -18,10 +18,11 @@ export default function PublishPage() {
       sellerEmail: '',
       title: '',
       author: '',
-      price: 15,
+      price: '',
       condition: '九成新',
       description: '',
-      coverUrl: ''
+      coverUrl: '',
+      meetupLocation: ''
     }
   });
 
@@ -70,7 +71,8 @@ export default function PublishPage() {
           condition: values.condition,
           title: values.title,
           author: values.author,
-          description: values.description
+          description: values.description,
+          meetupLocation: values.meetupLocation
         })
       });
       if (!response.ok) {
@@ -162,9 +164,10 @@ export default function PublishPage() {
                 <input
                   id="price"
                   type="number"
-                  step="0.5"
-                  min="0.1"
-                  {...register('price', { required: '请输入价格', min: { value: 0.1, message: '至少 0.1 元' } })}
+                  step="0.01"
+                  min="0.01"
+                  placeholder="15.00"
+                  {...register('price', { required: '请输入价格', min: { value: 0.01, message: '至少 0.01 元' } })}
                 />
                 {errors.price ? <p className="field-error">{errors.price.message}</p> : null}
               </div>
@@ -179,6 +182,16 @@ export default function PublishPage() {
                 </select>
                 {errors.condition ? <p className="field-error">{errors.condition.message}</p> : null}
               </div>
+            </div>
+
+            <div className="field">
+              <label htmlFor="meetupLocation">面交地址</label>
+              <input
+                id="meetupLocation"
+                placeholder="例如：图书馆一楼、西门食堂门口"
+                {...register('meetupLocation', { required: '请输入面交地址' })}
+              />
+              {errors.meetupLocation ? <p className="field-error">{errors.meetupLocation.message}</p> : null}
             </div>
 
             <div className="field">
@@ -197,7 +210,6 @@ export default function PublishPage() {
                 id="coverUrl"
                 placeholder="https://..."
                 {...register('coverUrl')}
-                readOnly
               />
               <p className="field-hint">可通过右侧上传组件自动填充。</p>
             </div>
