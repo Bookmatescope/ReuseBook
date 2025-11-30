@@ -5,11 +5,14 @@ import java.util.UUID;
 
 /**
  * 评价领域模型
+ * 
+ * @author 戴宏翔 - Day7 添加bookId支持按书籍查询评价
  */
 public record Review(
         UUID id,
         UUID orderId,
         UUID reviewerId,
+        UUID bookId,          // 书籍ID，用于按书籍查询评价
         int rating,           // 1-5 星评分
         String content,       // 评价内容
         Instant createdAt

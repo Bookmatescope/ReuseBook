@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 评价内存仓储实现
+ * 
+ * @author 戴宏翔 - Day7 添加findByBookId
  */
 @Repository
 public class InMemoryReviewRepository implements ReviewRepository {
@@ -35,6 +37,13 @@ public class InMemoryReviewRepository implements ReviewRepository {
     public List<Review> findByReviewerId(UUID reviewerId) {
         return storage.values().stream()
                 .filter(r -> r.reviewerId().equals(reviewerId))
+                .toList();
+    }
+
+    @Override
+    public List<Review> findByBookId(UUID bookId) {
+        return storage.values().stream()
+                .filter(r -> r.bookId() != null && r.bookId().equals(bookId))
                 .toList();
     }
 

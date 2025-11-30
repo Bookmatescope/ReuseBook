@@ -3,6 +3,7 @@ package com.reusebook.review.controller;
 import com.reusebook.auth.service.TokenService;
 import com.reusebook.review.dto.CreateReviewRequest;
 import com.reusebook.review.dto.ReviewResponse;
+import com.reusebook.review.dto.BookRatingResponse;
 import com.reusebook.review.service.ReviewService;
 import com.reusebook.user.service.ProfileService;
 import jakarta.validation.Valid;
@@ -16,6 +17,15 @@ import java.util.UUID;
 
 /**
  * 评价接口
+ * 
+ * 功能:
+ * 1. 创建评价（需要Token认证，只能评价已完成的订单）
+ * 2. 获取我的评价列表
+ * 3. 获取订单的评价
+ * 4. 获取书籍的评价列表
+ * 5. 获取书籍的平均评分
+ * 
+ * @author 戴宏翔 - Day7 完善
  */
 @RestController
 @RequestMapping("/api/reviews")
@@ -57,6 +67,22 @@ public class ReviewController {
     @GetMapping("/order/{orderId}")
     public ResponseEntity<ReviewResponse> getByOrderId(@PathVariable UUID orderId) {
         return ResponseEntity.ok(reviewService.getReviewByOrderId(orderId));
+    }
+
+    /**
+     * 获取书籍的评价列表
+     */
+    @GetMapping("/book/{bookId}")
+    public ResponseEntity<List<ReviewResponse>> getByBookId(@PathVariable UUID bookId) {
+        return ResponseEntity.ok(reviewService.getReviewsByBookId(bookId));
+    }
+
+    /**
+     * 获取书籍的平均评分
+     */
+    @GetMapping("/book/{bookId}/rating")
+    public ResponseEntity<BookRatingResponse> getBookRating(@PathVariable UUID bookId) {
+        return ResponseEntity.ok(reviewService.getBookRating(bookId));
     }
 
     private UUID extractUserId(HttpHeaders headers) {

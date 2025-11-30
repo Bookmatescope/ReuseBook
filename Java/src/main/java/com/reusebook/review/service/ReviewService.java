@@ -1,8 +1,10 @@
 package com.reusebook.review.service;
 
 import com.reusebook.common.exception.BusinessException;
+import com.reusebook.order.model.Order;
 import com.reusebook.order.model.OrderStatus;
 import com.reusebook.order.repository.OrderRepository;
+import com.reusebook.review.dto.BookRatingResponse;
 import com.reusebook.review.dto.CreateReviewRequest;
 import com.reusebook.review.dto.ReviewResponse;
 import com.reusebook.review.model.Review;
@@ -16,6 +18,15 @@ import java.util.UUID;
 
 /**
  * 评价服务
+ * 
+ * 功能:
+ * 1. 创建评价（仅已完成订单可评价）
+ * 2. 获取用户的评价列表
+ * 3. 获取订单的评价
+ * 4. 获取书籍的评价列表
+ * 5. 获取书籍的平均评分
+ * 
+ * @author 戴宏翔 - Day7 完善
  */
 @Service
 public class ReviewService {
@@ -53,6 +64,7 @@ public class ReviewService {
                 UUID.randomUUID(),
                 request.orderId(),
                 reviewerId,
+                order.bookId(),
                 request.rating(),
                 request.content() != null ? request.content() : "",
                 Instant.now()
@@ -78,6 +90,30 @@ public class ReviewService {
         return reviewRepository.findByOrderId(orderId)
                 .map(this::toResponse)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "评价不存在"));
+    }
+
+    /**
+     * 获取书籍的评价列表
+     */
+    public List<ReviewResponse> getReviewsByBookId(UUID bookId) {
+        return reviewRepository.findByBookId(bookId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /**
+     * 获取书籍的平均评分
+     */
+    public BookRatingResponse getBookRating(UUID bookId) {
+        List<Review> reviews = reviewRepository.findByBookId(bookId);
+        if (reviews.isEmpty()) {
+            return new BookRatingResponse(bookId, 0.0, 0);
+        }
+        double avgRating = reviews.stream()
+                .mapToInt(Review::rating)
+                .average()
+                .orElse(0.0);
+        return new BookRatingResponse(bookId, Math.round(avgRating * 10) / 10.0, reviews.size());
     }
 
     private ReviewResponse toResponse(Review review) {
