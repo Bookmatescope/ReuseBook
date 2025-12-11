@@ -1,9 +1,12 @@
 // 书籍发布页面：整合 ISBN 查询、图文表单与上传组件
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import ImageUploader from '../components/uploads/ImageUploader.jsx';
 
 const conditionOptions = ['全新', '九九新', '九成新', '八成新', '七成新'];
+
+// 获取当前登录用户邮箱
+const getUserEmail = () => localStorage.getItem('email') || '';
 
 export default function PublishPage() {
   const {
@@ -15,7 +18,7 @@ export default function PublishPage() {
   } = useForm({
     defaultValues: {
       isbn: '',
-      sellerEmail: '',
+      sellerEmail: getUserEmail(),  // 自动填充用户邮箱
       title: '',
       author: '',
       price: '',
@@ -25,6 +28,14 @@ export default function PublishPage() {
       meetupLocation: ''
     }
   });
+
+  // 组件挂载时自动填充邮箱
+  useEffect(() => {
+    const email = getUserEmail();
+    if (email) {
+      setValue('sellerEmail', email);
+    }
+  }, [setValue]);
 
   const [isbnInfo, setIsbnInfo] = useState(null);
   const [isbnLoading, setIsbnLoading] = useState(false);
@@ -290,11 +301,6 @@ export default function PublishPage() {
               </div>
             )}
           </div>
-          <ImageUploader
-            title="上传封面"
-            subtitle="支持 PNG/JPEG/WebP，大小 5MB 内"
-            onUploaded={handleUploadSuccess}
-          />
         </aside>
       </div>
     </div>

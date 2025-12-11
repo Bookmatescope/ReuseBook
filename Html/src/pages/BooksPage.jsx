@@ -83,10 +83,21 @@ export default function BooksPage() {
             {paged.map((book) => (
               <li key={book.id} className="book-card">
                 <Link to={`/books/${book.id}`} className="book-link">
-                  <h3 className="book-title">{book.title}</h3>
-                  <p className="book-author">{book.author}</p>
-                  <p className="book-price">¥{book.price?.toFixed(2)}</p>
-                  <span className="book-condition">{book.condition}</span>
+                  <div className="book-cover-wrapper">
+                    {book.coverUrl ? (
+                      <img src={book.coverUrl} alt={book.title} className="book-cover" />
+                    ) : (
+                      <div className="book-cover-placeholder">
+                        <span>📖</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="book-info">
+                    <h3 className="book-title">{book.title}</h3>
+                    <p className="book-author">{book.author}</p>
+                    <p className="book-price">¥{book.price?.toFixed(2)}</p>
+                    <span className="book-condition">{book.condition}</span>
+                  </div>
                 </Link>
               </li>
             ))}

@@ -167,21 +167,21 @@ export default function ProfilePage() {
           {editing ? (
             <div className="edit-actions">
               <button 
-                className="btn-primary" 
+                className="profile-btn profile-btn-primary" 
                 onClick={handleSave}
                 disabled={saving}
               >
                 {saving ? '保存中...' : '保存'}
               </button>
               <button 
-                className="btn-secondary" 
+                className="profile-btn profile-btn-secondary" 
                 onClick={() => { setEditing(false); setNickname(profile?.nickname); }}
               >
                 取消
               </button>
             </div>
           ) : (
-            <button className="btn-secondary" onClick={() => setEditing(true)}>
+            <button className="profile-btn profile-btn-edit" onClick={() => setEditing(true)}>
               ✏️ 编辑
             </button>
           )}
@@ -215,7 +215,7 @@ export default function ProfilePage() {
           <span className="menu-arrow">›</span>
         </div>
         <div className="menu-item" onClick={() => navigate('/cart')}>
-          <span className="menu-icon">�</span>
+          <span className="menu-icon">🛒</span>
           <span className="menu-text">购物车</span>
           <span className="menu-arrow">›</span>
         </div>
@@ -225,7 +225,7 @@ export default function ProfilePage() {
           <span className="menu-arrow">›</span>
         </div>
         <div className="menu-item" onClick={() => navigate('/books')}>
-          <span className="menu-icon">�</span>
+          <span className="menu-icon">🔍</span>
           <span className="menu-text">浏览书籍</span>
           <span className="menu-arrow">›</span>
         </div>

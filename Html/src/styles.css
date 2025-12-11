@@ -751,6 +751,8 @@ a:hover {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   overflow: hidden;
   transition: transform 0.15s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .book-card:hover {
@@ -758,8 +760,44 @@ a:hover {
 }
 
 .book-link {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 书籍封面容器 */
+.book-cover-wrapper {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.book-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 3rem;
+  color: #94a3b8;
+}
+
+/* 书籍信息区域 */
+.book-info {
   padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .book-title {
@@ -2596,4 +2634,59 @@ a:hover {
 /* 个人中心页面优化 */
 .profile-page h1 {
   margin-bottom: 1.5rem;
+}
+
+/* 个人中心按钮样式 */
+.profile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  gap: 0.5rem;
+}
+
+.profile-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.profile-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.profile-btn-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.profile-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+}
+
+.profile-btn-edit {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.profile-btn-edit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+/* 卖家邮箱样式 */
+.seller-email {
+  color: #666;
+  font-size: 0.9rem;
+  margin-left: 0.25rem;
 }

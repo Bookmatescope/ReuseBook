@@ -121,7 +121,7 @@ export default function BookDetailPage() {
 
   return (
     <div className="book-detail-page">
-      <header className="detail-header">
+      <header className="detail-header" style={{ marginTop: '1rem' }}>
         <Link to="/books">← 返回列表</Link>
       </header>
 
