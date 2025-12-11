@@ -17,6 +17,7 @@ public record Book(
         String condition,
         String sellerEmail,
         String meetupLocation,  // 面交地址（卖家提供）
+        String coverUrl,        // 封面图片URL
         Instant createdAt
 ) {
 }

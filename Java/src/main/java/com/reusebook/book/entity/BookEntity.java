@@ -43,6 +43,9 @@ public class BookEntity {
     @Column(name = "meetup_location", nullable = false, length = 200)
     private String meetupLocation;
 
+    @Column(name = "cover_url", length = 500)
+    private String coverUrl;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -54,7 +57,7 @@ public class BookEntity {
 
     public BookEntity(UUID id, String isbn, String title, String author, String description,
                       BigDecimal price, String condition, String sellerEmail, 
-                      String meetupLocation, Instant createdAt) {
+                      String meetupLocation, String coverUrl, Instant createdAt) {
         this.id = id;
         this.isbn = isbn;
         this.title = title;
@@ -64,6 +67,7 @@ public class BookEntity {
         this.condition = condition;
         this.sellerEmail = sellerEmail;
         this.meetupLocation = meetupLocation;
+        this.coverUrl = coverUrl;
         this.createdAt = createdAt;
     }
 
@@ -145,6 +149,14 @@ public class BookEntity {
 
     public void setMeetupLocation(String meetupLocation) {
         this.meetupLocation = meetupLocation;
+    }
+
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 
     public Instant getCreatedAt() {

@@ -87,6 +87,7 @@ public class DatabaseBookRepository implements BookRepository {
                 model.condition(),
                 model.sellerEmail(),
                 model.meetupLocation(),
+                model.coverUrl(),
                 model.createdAt()
         );
         return entity;
@@ -103,6 +104,7 @@ public class DatabaseBookRepository implements BookRepository {
                 entity.getCondition(),
                 entity.getSellerEmail(),
                 entity.getMeetupLocation(),
+                entity.getCoverUrl(),
                 entity.getCreatedAt()
         );
     }

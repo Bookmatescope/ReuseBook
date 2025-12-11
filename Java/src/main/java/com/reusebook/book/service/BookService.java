@@ -6,6 +6,7 @@ import com.reusebook.book.dto.IsbnLookupResponse;
 import com.reusebook.book.model.Book;
 import com.reusebook.book.repository.BookRepository;
 import com.reusebook.common.exception.BusinessException;
+import com.reusebook.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +24,12 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final IsbnLookupService isbnLookupService;
+    private final UserRepository userRepository;
 
-    public BookService(BookRepository bookRepository, IsbnLookupService isbnLookupService) {
+    public BookService(BookRepository bookRepository, IsbnLookupService isbnLookupService, UserRepository userRepository) {
         this.bookRepository = bookRepository;
         this.isbnLookupService = isbnLookupService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -45,6 +48,8 @@ public class BookService {
         String title = pickValue(request.title(), meta != null ? meta.title() : null, "待补充书名");
         String author = pickValue(request.author(), meta != null ? meta.author() : null, "佚名作者");
         String description = pickValue(request.description(), meta != null ? meta.publisher() : null, "尚未填写简介");
+        // 封面图：优先使用用户提供的，其次使用 ISBN 查询的
+        String coverUrl = pickValue(request.coverUrl(), meta != null ? meta.coverUrl() : null, null);
         Book book = new Book(
                 UUID.randomUUID(),
                 normalizeIsbn(request.isbn()),
@@ -55,6 +60,7 @@ public class BookService {
                 request.condition(),
                 request.sellerEmail(),
                 request.meetupLocation(),
+                coverUrl,
                 Instant.now()
         );
         bookRepository.save(book);
@@ -123,6 +129,10 @@ public class BookService {
     }
 
     private BookResponse toResponse(Book book) {
+        // 获取卖家昵称
+        String sellerNickname = userRepository.findByEmail(book.sellerEmail())
+                .map(user -> user.nickname())
+                .orElse(null);
         return new BookResponse(
                 book.id(),
                 book.isbn(),
@@ -132,7 +142,9 @@ public class BookService {
                 book.price().setScale(2, RoundingMode.HALF_UP),
                 book.condition(),
                 book.sellerEmail(),
+                sellerNickname,
                 book.meetupLocation(),
+                book.coverUrl(),
                 book.createdAt()
         );
     }
