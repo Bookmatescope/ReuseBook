@@ -51,6 +51,8 @@ reusebook:
   storage:
     image-dir: ${REUSEBOOK_IMAGE_DIR:uploads}
     public-url-prefix: /uploads/
+  isbn:
+    api-key: ${ISBN_API_KEY:}  # 探数 ISBN API 密钥，从环境变量读取
 
 ---
 # MySQL生产环境配置（激活方式：--spring.profiles.active=mysql）

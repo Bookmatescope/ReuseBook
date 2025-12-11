@@ -534,6 +534,109 @@ a:hover {
   gap: 0.4rem;
 }
 
+/* ISBN 解析结果卡片 */
+.isbn-result-card {
+  border: 2px solid #e0e7ff;
+  background: linear-gradient(180deg, #f0f4ff 0%, #fff 100%);
+}
+
+.isbn-result-card h4 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: #1e40af;
+}
+
+.isbn-result-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.isbn-cover {
+  text-align: center;
+}
+
+.isbn-cover img {
+  max-width: 150px;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.isbn-details {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.isbn-details li {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.isbn-details li:last-child {
+  border-bottom: none;
+}
+
+.isbn-details .label {
+  flex-shrink: 0;
+  width: 60px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.isbn-details .value {
+  color: #1f2937;
+  word-break: break-word;
+}
+
+.isbn-summary {
+  background: #f8fafc;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.isbn-summary .label {
+  display: block;
+  color: #64748b;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+.isbn-summary p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.isbn-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #64748b;
+}
+
+.isbn-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+.isbn-empty p {
+  margin: 0 0 0.5rem;
+}
+
+.isbn-empty .hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
 @media (max-width: 960px) {
   .publish-layout {
     grid-template-columns: 1fr;

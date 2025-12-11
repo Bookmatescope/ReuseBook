@@ -62,6 +62,46 @@ npm run dev
 ```
 前端运行在 `http://localhost:5173`
 
+### 环境变量配置
+
+| 变量名 | 说明 | 必填 |
+|--------|------|------|
+| `ISBN_API_KEY` | 探数 ISBN API 密钥 | 否 |
+| `REUSEBOOK_IMAGE_DIR` | 图片存储目录 | 否 |
+
+#### ISBN API 配置
+
+发布书籍时支持通过 ISBN 自动查询书籍信息。需要配置探数 API 密钥：
+
+1. 前往 [探数API](https://www.tanshuapi.com) 申请免费 API Key
+2. 配置方式（三选一）：
+
+**方式一：环境变量**
+```bash
+# Windows PowerShell
+$env:ISBN_API_KEY="your-api-key"
+mvn spring-boot:run
+
+# Linux/Mac
+export ISBN_API_KEY=your-api-key
+mvn spring-boot:run
+```
+
+**方式二：本地配置文件**
+```bash
+# 复制示例文件
+cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
+# 编辑填入 API Key，然后启动
+mvn spring-boot:run -Dspring.profiles.active=local
+```
+
+**方式三：启动参数**
+```bash
+mvn spring-boot:run -Dreusebook.isbn.api-key=your-api-key
+```
+
+> 💡 未配置 API Key 时，ISBN 查询功能仍可使用，但会返回占位信息供手动填写。
+
 ## API 接口
 
 详见 [API文档](docs/api.md)

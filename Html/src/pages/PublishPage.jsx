@@ -47,8 +47,14 @@ export default function PublishPage() {
       }
       const data = await response.json();
       setIsbnInfo(data);
+      // 自动填充表单字段
       setValue('title', data.title || '');
       setValue('author', data.author || '');
+      // 如果有封面图，自动填入
+      if (data.coverUrl) {
+        setValue('coverUrl', data.coverUrl);
+      }
+      setFeedback({ type: 'success', text: 'ISBN 查询成功，信息已自动填充' });
     } catch (error) {
       setIsbnInfo(null);
       setFeedback({ type: 'error', text: error.message });
@@ -224,29 +230,64 @@ export default function PublishPage() {
         </form>
 
         <aside className="publish-side">
-          <div className="info-card">
-            <h4>ISBN 解析结果</h4>
+          <div className="info-card isbn-result-card">
+            <h4>📚 ISBN 解析结果</h4>
             {isbnInfo ? (
-              <ul>
-                <li>
-                  <strong>书名：</strong>
-                  {isbnInfo.title || '—'}
-                </li>
-                <li>
-                  <strong>作者：</strong>
-                  {isbnInfo.author || '—'}
-                </li>
-                <li>
-                  <strong>出版社：</strong>
-                  {isbnInfo.publisher || '—'}
-                </li>
-                <li>
-                  <strong>出版时间：</strong>
-                  {isbnInfo.publishedAt || '—'}
-                </li>
-              </ul>
+              <div className="isbn-result-content">
+                {isbnInfo.coverUrl && (
+                  <div className="isbn-cover">
+                    <img src={isbnInfo.coverUrl} alt={isbnInfo.title} />
+                  </div>
+                )}
+                <ul className="isbn-details">
+                  <li>
+                    <span className="label">书名</span>
+                    <span className="value">{isbnInfo.title || '—'}</span>
+                  </li>
+                  <li>
+                    <span className="label">作者</span>
+                    <span className="value">{isbnInfo.author || '—'}</span>
+                  </li>
+                  <li>
+                    <span className="label">出版社</span>
+                    <span className="value">{isbnInfo.publisher || '—'}</span>
+                  </li>
+                  <li>
+                    <span className="label">出版时间</span>
+                    <span className="value">{isbnInfo.pubdate || '—'}</span>
+                  </li>
+                  {isbnInfo.pages && (
+                    <li>
+                      <span className="label">页数</span>
+                      <span className="value">{isbnInfo.pages}</span>
+                    </li>
+                  )}
+                  {isbnInfo.price && (
+                    <li>
+                      <span className="label">定价</span>
+                      <span className="value">{isbnInfo.price}</span>
+                    </li>
+                  )}
+                  {isbnInfo.binding && (
+                    <li>
+                      <span className="label">装帧</span>
+                      <span className="value">{isbnInfo.binding}</span>
+                    </li>
+                  )}
+                </ul>
+                {isbnInfo.summary && (
+                  <div className="isbn-summary">
+                    <span className="label">内容简介</span>
+                    <p>{isbnInfo.summary.length > 200 ? isbnInfo.summary.substring(0, 200) + '...' : isbnInfo.summary}</p>
+                  </div>
+                )}
+              </div>
             ) : (
-              <p className="field-hint">查询后将展示豆瓣/国图返回的图书元数据。</p>
+              <div className="isbn-empty">
+                <div className="isbn-empty-icon">🔍</div>
+                <p>输入 ISBN 后点击"自动补全"查询图书信息</p>
+                <p className="hint">支持 10 位或 13 位 ISBN 编码</p>
+              </div>
             )}
           </div>
           <ImageUploader
