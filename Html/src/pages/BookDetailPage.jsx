@@ -159,7 +159,12 @@ export default function BookDetailPage() {
           {/* 卖家信息 */}
           <div className="seller-info">
             <span className="seller-label">卖家：</span>
-            <span className="seller-name">{book.sellerNickname || book.sellerEmail}</span>
+            {/* 昵称（邮箱） */}
+            <span className="seller-name">
+              {book.sellerNickname && book.sellerEmail 
+                ? `${book.sellerNickname}(${book.sellerEmail})`
+                : book.sellerNickname || book.sellerEmail}
+            </span>
           </div>
 
           {/* 面交地址信息 */}

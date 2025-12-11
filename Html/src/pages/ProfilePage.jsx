@@ -124,7 +124,13 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     if (confirm('确定要退出登录吗？')) {
+      // 清除所有登录相关的存储
       localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('reusebook_token');
+      localStorage.removeItem('reusebook_profile');
+      // 触发事件通知 Navbar 更新状态
+      window.dispatchEvent(new Event('loginStateChange'));
       navigate('/login');
     }
   };
@@ -189,22 +195,6 @@ export default function ProfilePage() {
         <p className="join-date">
           🗓️ 加入时间：{new Date(profile?.createdAt).toLocaleDateString('zh-CN')}
         </p>
-      </section>
-
-      {/* 统计数据 */}
-      <section className="profile-stats">
-        <div className="stat-item" onClick={() => navigate('/orders')}>
-          <span className="stat-value">{stats.orders}</span>
-          <span className="stat-label">订单</span>
-        </div>
-        <div className="stat-item" onClick={() => navigate('/publish')}>
-          <span className="stat-value">{stats.published}</span>
-          <span className="stat-label">发布</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{stats.reviews}</span>
-          <span className="stat-label">评价</span>
-        </div>
       </section>
 
       {/* 功能入口 */}
