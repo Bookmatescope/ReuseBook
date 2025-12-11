@@ -144,9 +144,10 @@ class BookServiceTest {
                 "校门口"
         );
         var response = bookService.create(request);
-        assertThat(response.title()).isEqualTo("待补充书名");
-        assertThat(response.author()).isEqualTo("佚名作者");
-        assertThat(response.description()).isEqualTo("尚未填写简介");
+        // IsbnLookupService对未知ISBN返回占位信息，Create时会使用这些占位值
+        assertThat(response.title()).isEqualTo("请手动填写书名");
+        assertThat(response.author()).isEqualTo("请手动填写作者");
+        assertThat(response.description()).isEqualTo("未知出版社");
     }
 
     @Test
