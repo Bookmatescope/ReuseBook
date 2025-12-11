@@ -24,6 +24,7 @@ export default function CartPage() {
 
   // 获取登录Token
   const getAuthToken = () => localStorage.getItem('token');
+  const getUserEmail = () => localStorage.getItem('email');
   const isLoggedIn = () => !!getAuthToken();
 
   useEffect(() => {
@@ -37,7 +38,8 @@ export default function CartPage() {
   const fetchCartItems = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/cart/items`, {
+      const email = getUserEmail();
+      const res = await fetch(`${API_BASE}/cart/items?buyerEmail=${encodeURIComponent(email)}`, {
         headers: {
           'Authorization': `Bearer ${getAuthToken()}`
         }
@@ -134,17 +136,14 @@ export default function CartPage() {
   if (loading) {
     return (
       <div className="cart-page">
-        <div className="container">
-          <p className="loading">加载中...</p>
-        </div>
+        <p className="loading">加载中...</p>
       </div>
     );
   }
 
   return (
     <div className="cart-page">
-      <div className="container">
-        <h1>🛒 我的购物车</h1>
+      <h1>🛒 我的购物车</h1>
 
         {error && <p className="error-message">{error}</p>}
 
@@ -241,7 +240,6 @@ export default function CartPage() {
             </div>
           </>
         )}
-      </div>
     </div>
   );
 }

@@ -29,6 +29,7 @@ export default function CheckoutPage() {
 
   // 获取登录Token
   const getAuthToken = () => localStorage.getItem('token');
+  const getUserEmail = () => localStorage.getItem('email');
   const isLoggedIn = () => !!getAuthToken();
 
   useEffect(() => {
@@ -47,7 +48,8 @@ export default function CheckoutPage() {
       const checkoutItemsStr = localStorage.getItem('checkoutItems');
       const checkoutItems = checkoutItemsStr ? JSON.parse(checkoutItemsStr) : [];
 
-      const res = await fetch(`${API_BASE}/cart/items`, {
+      const email = getUserEmail();
+      const res = await fetch(`${API_BASE}/cart/items?buyerEmail=${encodeURIComponent(email)}`, {
         headers: { 'Authorization': `Bearer ${getAuthToken()}` }
       });
       
@@ -83,48 +85,47 @@ export default function CheckoutPage() {
     setError(null);
     
     try {
-      // 为每本书创建订单
-      const orderPromises = cartItems.map(item => 
-        fetch(`${API_BASE}/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getAuthToken()}`
-          },
-          body: JSON.stringify({
-            bookId: item.bookId,
-            quantity: item.quantity || 1
-          })
+      // 构建订单项列表
+      const orderItems = cartItems.map(item => ({
+        bookId: item.bookId,
+        quantity: item.quantity || 1
+      }));
+
+      // 创建订单（面交模式，无需地址）
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getAuthToken()}`
+        },
+        body: JSON.stringify({
+          items: orderItems,
+          addressId: null
         })
-      );
+      });
 
-      const results = await Promise.all(orderPromises);
-      
-      // 检查是否全部成功
-      const allSuccess = results.every(res => res.ok);
-      
-      if (allSuccess) {
-        // 清空购物车中的这些商品
-        for (const item of cartItems) {
-          await fetch(`${API_BASE}/cart/items/${item.id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${getAuthToken()}` }
-          });
-        }
-
-        // 清空选中状态
-        localStorage.removeItem('checkoutItems');
-        
-        setOrderSuccess(true);
-        
-        // 获取第一个订单的ID用于跳转
-        const firstOrderData = await results[0].json();
-        setCreatedOrderId(firstOrderData.id);
-      } else {
-        setError('部分订单创建失败，请检查后重试');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || '订单创建失败');
       }
+
+      const orderData = await res.json();
+      
+      // 清空购物车中的这些商品
+      for (const item of cartItems) {
+        await fetch(`${API_BASE}/cart/items/${item.id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${getAuthToken()}` }
+        });
+      }
+
+      // 清空选中状态
+      localStorage.removeItem('checkoutItems');
+      
+      setOrderSuccess(true);
+      setCreatedOrderId(orderData.id);
     } catch (err) {
-      setError('网络错误，请稍后重试');
+      setError(err.message || '网络错误，请稍后重试');
     } finally {
       setSubmitting(false);
     }
@@ -143,32 +144,89 @@ export default function CheckoutPage() {
     return (
       <div className="page-container checkout-page">
         <div className="order-success">
-          <div className="success-icon">✅</div>
-          <h1>订单提交成功！</h1>
+          <div className="success-animation">
+            <div className="success-checkmark">
+              <div className="check-icon">
+                <span className="icon-line line-tip"></span>
+                <span className="icon-line line-long"></span>
+                <div className="icon-circle"></div>
+                <div className="icon-fix"></div>
+              </div>
+            </div>
+          </div>
+          
+          <h1 className="success-title">🎉 订单提交成功！</h1>
           <p className="success-message">
             订单已创建，等待卖家确认后将与您约定面交时间地点。
           </p>
-          <div className="success-tips">
-            <h3>📋 下一步</h3>
-            <ol>
-              <li>等待卖家确认订单</li>
-              <li>卖家确认后，联系卖家约定面交时间</li>
-              <li>到指定地点完成面交</li>
-              <li>交易完成后，可以对卖家进行评价</li>
-            </ol>
+          
+          <div className="order-info-card">
+            <div className="order-info-header">
+              <span className="order-label">订单号</span>
+              <span className="order-id">{createdOrderId}</span>
+            </div>
+            <div className="order-info-detail">
+              <div className="info-item">
+                <span className="info-label">商品数量</span>
+                <span className="info-value">{cartItems.length} 件</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">订单金额</span>
+                <span className="info-value price">¥{totalAmount.toFixed(2)}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">交易方式</span>
+                <span className="info-value meetup">🤝 面交</span>
+              </div>
+            </div>
           </div>
+
+          <div className="success-timeline">
+            <h3>📋 交易流程</h3>
+            <div className="timeline">
+              <div className="timeline-item active">
+                <div className="timeline-dot"></div>
+                <div className="timeline-content">
+                  <span className="timeline-title">提交订单</span>
+                  <span className="timeline-desc">已完成</span>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-dot"></div>
+                <div className="timeline-content">
+                  <span className="timeline-title">卖家确认</span>
+                  <span className="timeline-desc">等待中...</span>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-dot"></div>
+                <div className="timeline-content">
+                  <span className="timeline-title">约定面交</span>
+                  <span className="timeline-desc">待进行</span>
+                </div>
+              </div>
+              <div className="timeline-item">
+                <div className="timeline-dot"></div>
+                <div className="timeline-content">
+                  <span className="timeline-title">交易完成</span>
+                  <span className="timeline-desc">待进行</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="success-actions">
             <button 
-              className="btn btn-primary"
+              className="btn btn-primary btn-large"
               onClick={() => navigate('/orders')}
             >
-              查看我的订单
+              📦 查看我的订单
             </button>
             <button 
               className="btn btn-secondary"
-              onClick={() => navigate('/books')}
+              onClick={() => navigate('/')}
             >
-              继续购书
+              🏠 返回首页
             </button>
           </div>
         </div>

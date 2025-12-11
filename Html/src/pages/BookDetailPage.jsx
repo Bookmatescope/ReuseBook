@@ -29,6 +29,7 @@ export default function BookDetailPage() {
 
   // 获取登录用户信息
   const getAuthToken = () => localStorage.getItem('token');
+  const getUserEmail = () => localStorage.getItem('email');
   const isLoggedIn = () => !!getAuthToken();
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export default function BookDetailPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAuthToken()}`
         },
-        body: JSON.stringify({ bookId: id, quantity: 1 }),
+        body: JSON.stringify({ bookId: id, buyerEmail: getUserEmail(), quantity: 1 }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -98,7 +99,7 @@ export default function BookDetailPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAuthToken()}`
         },
-        body: JSON.stringify({ bookId: id, quantity: 1 }),
+        body: JSON.stringify({ bookId: id, buyerEmail: getUserEmail(), quantity: 1 }),
       });
       if (!res.ok) {
         const err = await res.json();
