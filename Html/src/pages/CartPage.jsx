@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const API_BASE = 'http://localhost:8081/api';
 
@@ -8,12 +8,11 @@ const API_BASE = 'http://localhost:8081/api';
  * 
  * 功能:
  * 1. 展示购物车商品列表
- * 2. 支持修改商品数量
- * 3. 支持删除商品
- * 4. 实时计算总价
- * 5. 跳转到结算页面
+ * 2. 支持删除商品
+ * 3. 实时计算总价
+ * 4. 跳转到结算页面
  * 
- * @author 杨浩 - Day7 完善
+ * 注：二手书每本唯一，无需数量加减功能
  */
 export default function CartPage() {
   const navigate = useNavigate();
@@ -56,29 +55,8 @@ export default function CartPage() {
     }
   };
 
-  const updateQuantity = async (cartItemId, newQuantity) => {
-    if (newQuantity < 1) return;
-    try {
-      const res = await fetch(`${API_BASE}/cart/items/${cartItemId}`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`
-        },
-        body: JSON.stringify({ quantity: newQuantity }),
-      });
-      if (!res.ok) throw new Error('更新数量失败');
-      const updated = await res.json();
-      setCartItems(items => items.map(item => 
-        item.id === cartItemId ? updated : item
-      ));
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   const removeItem = async (cartItemId) => {
-    if (!confirm('确定要删除这件商品吗？')) return;
+    if (!confirm('确定要移除这本书吗？')) return;
     try {
       const res = await fetch(`${API_BASE}/cart/items/${cartItemId}`, {
         method: 'DELETE',
@@ -120,7 +98,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (selectedItems.size === 0) {
-      alert('请选择要结算的商品');
+      alert('请选择要结算的书籍');
       return;
     }
     // 将选中的商品ID存储到localStorage
@@ -131,115 +109,126 @@ export default function CartPage() {
   // 计算选中商品的总价
   const selectedTotal = cartItems
     .filter(item => selectedItems.has(item.id))
-    .reduce((sum, item) => sum + item.subtotal, 0);
+    .reduce((sum, item) => sum + (item.unitPrice || 0), 0);
 
   if (loading) {
     return (
-      <div className="cart-page">
+      <div className="page-container cart-page">
         <p className="loading">加载中...</p>
       </div>
     );
   }
 
   return (
-    <div className="cart-page">
-      <h1>🛒 我的购物车</h1>
+    <div className="page-container cart-page">
+      <header className="cart-header-title">
+        <h1>🛒 我的购物车</h1>
+        {cartItems.length > 0 && (
+          <span className="cart-count">{cartItems.length} 本书</span>
+        )}
+      </header>
 
-        {error && <p className="error-message">{error}</p>}
+      {error && <div className="error-banner">{error}</div>}
 
-        {cartItems.length === 0 ? (
-          <div className="cart-empty">
-            <div className="empty-icon">🛒</div>
-            <p>购物车空空如也</p>
-            <a href="/books" className="btn btn-primary">去选购书籍</a>
+      {cartItems.length === 0 ? (
+        <div className="cart-empty-state">
+          <div className="empty-illustration">
+            <span className="empty-icon">📚</span>
           </div>
-        ) : (
-          <>
-            {/* 全选 */}
-            <div className="cart-header">
-              <label className="select-all">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.size === cartItems.length}
-                  onChange={toggleSelectAll}
-                />
-                <span>全选</span>
-              </label>
-              <span className="header-info">商品信息</span>
-              <span className="header-price">单价</span>
-              <span className="header-quantity">数量</span>
-              <span className="header-subtotal">小计</span>
-              <span className="header-action">操作</span>
-            </div>
+          <h2>购物车空空如也</h2>
+          <p>快去发现心仪的二手书吧！</p>
+          <Link to="/" className="action-btn action-btn-primary">
+            🔍 浏览书籍
+          </Link>
+        </div>
+      ) : (
+        <div className="cart-content">
+          {/* 全选栏 */}
+          <div className="cart-select-bar">
+            <label className="select-all-label">
+              <input
+                type="checkbox"
+                checked={selectedItems.size === cartItems.length && cartItems.length > 0}
+                onChange={toggleSelectAll}
+                className="checkbox-input"
+              />
+              <span className="checkbox-custom"></span>
+              <span>全选</span>
+            </label>
+          </div>
 
-            <div className="cart-list">
-              {cartItems.map(item => (
-                <div key={item.id} className={`cart-item ${selectedItems.has(item.id) ? 'selected' : ''}`}>
+          {/* 购物车列表 */}
+          <div className="cart-items-list">
+            {cartItems.map(item => (
+              <div 
+                key={item.id} 
+                className={`cart-item-card ${selectedItems.has(item.id) ? 'selected' : ''}`}
+              >
+                <label className="item-select">
                   <input
                     type="checkbox"
                     checked={selectedItems.has(item.id)}
                     onChange={() => toggleSelectItem(item.id)}
-                    className="item-checkbox"
+                    className="checkbox-input"
                   />
-                  <div className="cart-item-info">
-                    <h3 className="cart-item-title">{item.bookTitle}</h3>
+                  <span className="checkbox-custom"></span>
+                </label>
+
+                <div className="item-content">
+                  <div className="item-main">
+                    <Link to={`/books/${item.bookId}`} className="item-title">
+                      {item.bookTitle}
+                    </Link>
+                    {item.condition && (
+                      <span className="item-condition">{item.condition}</span>
+                    )}
                     {item.meetupLocation && (
-                      <p className="cart-item-location">📍 {item.meetupLocation}</p>
+                      <p className="item-location">
+                        <span className="location-icon">📍</span>
+                        {item.meetupLocation}
+                      </p>
                     )}
                   </div>
-                  <div className="cart-item-price">
-                    <span>¥{item.unitPrice.toFixed(2)}</span>
-                  </div>
-                  <div className="cart-item-quantity">
+                  
+                  <div className="item-right">
+                    <div className="item-price">
+                      <span className="price-label">价格</span>
+                      <span className="price-value">¥{(item.unitPrice || 0).toFixed(2)}</span>
+                    </div>
                     <button 
-                      className="qty-btn"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
+                      className="item-remove-btn"
+                      onClick={() => removeItem(item.id)}
+                      title="移除"
                     >
-                      −
-                    </button>
-                    <span className="qty-value">{item.quantity}</span>
-                    <button 
-                      className="qty-btn"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
-                      +
+                      <span className="remove-icon">×</span>
                     </button>
                   </div>
-                  <div className="cart-item-subtotal">
-                    <span className="subtotal-price">¥{item.subtotal.toFixed(2)}</span>
-                  </div>
-                  <button 
-                    className="cart-item-remove"
-                    onClick={() => removeItem(item.id)}
-                    title="删除"
-                  >
-                    🗑️
-                  </button>
                 </div>
-              ))}
-            </div>
-
-            {/* 结算栏 */}
-            <div className="cart-footer">
-              <div className="cart-summary">
-                <span className="selected-count">
-                  已选 <strong>{selectedItems.size}</strong> 件
-                </span>
-                <span className="cart-total">
-                  合计：<strong className="total-price">¥{selectedTotal.toFixed(2)}</strong>
-                </span>
               </div>
-              <button 
-                className="btn btn-primary checkout-btn"
-                onClick={handleCheckout}
-                disabled={selectedItems.size === 0}
-              >
-                去结算
-              </button>
+            ))}
+          </div>
+
+          {/* 结算栏 */}
+          <div className="cart-checkout-bar">
+            <div className="checkout-info">
+              <div className="selected-info">
+                已选 <strong>{selectedItems.size}</strong> 本
+              </div>
+              <div className="total-info">
+                <span className="total-label">合计：</span>
+                <span className="total-amount">¥{selectedTotal.toFixed(2)}</span>
+              </div>
             </div>
-          </>
-        )}
+            <button 
+              className="checkout-btn"
+              onClick={handleCheckout}
+              disabled={selectedItems.size === 0}
+            >
+              去结算
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
