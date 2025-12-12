@@ -2,6 +2,7 @@ package com.reusebook.book.service;
 
 import com.reusebook.book.dto.BookResponse;
 import com.reusebook.book.dto.CreateBookRequest;
+import com.reusebook.book.dto.IsbnLookupResponse;
 import com.reusebook.book.repository.InMemoryBookRepository;
 import com.reusebook.common.exception.BusinessException;
 import com.reusebook.user.repository.InMemoryUserRepository;
@@ -9,20 +10,51 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * 书籍服务单元测试：覆盖 ISBN 查询与发布创建
+ * 使用 Mock 的 IsbnLookupService，不依赖外部 API
  */
 class BookServiceTest {
 
     private BookService bookService;
 
+    /**
+     * Mock IsbnLookupService：返回预定义数据，不依赖外部 API 配置
+     */
+    static class MockIsbnLookupService extends IsbnLookupService {
+        @Override
+        public Optional<IsbnLookupResponse> lookup(String rawIsbn) {
+            if (rawIsbn == null || rawIsbn.isBlank()) {
+                return Optional.empty();
+            }
+            String normalized = rawIsbn.replaceAll("[- ]", "").toUpperCase();
+            
+            if (normalized.length() < 10 || normalized.length() > 13) {
+                return Optional.empty();
+            }
+            
+            return switch (normalized) {
+                case "9787115428028" -> Optional.of(new IsbnLookupResponse(
+                        normalized, "深入理解计算机系统", "Randal E.Bryant",
+                        "人民邮电出版社", "2016-11", null, null, null, null, null, null));
+                case "9787111544937" -> Optional.of(new IsbnLookupResponse(
+                        normalized, "算法导论", "Thomas H.Cormen",
+                        "机械工业出版社", "2012-12", null, null, null, null, null, null));
+                default -> Optional.of(new IsbnLookupResponse(
+                        normalized, "请手动填写书名", "请手动填写作者",
+                        "未知出版社", null, null, null, null, null, null, null));
+            };
+        }
+    }
+
     @BeforeEach
     void setUp() {
-        bookService = new BookService(new InMemoryBookRepository(), new IsbnLookupService(), new InMemoryUserRepository());
+        bookService = new BookService(new InMemoryBookRepository(), new MockIsbnLookupService(), new InMemoryUserRepository());
     }
 
     @Test
