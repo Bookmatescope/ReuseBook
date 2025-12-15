@@ -1,5 +1,6 @@
 package com.reusebook.order.service;
 
+import com.reusebook.user.repository.InMemoryUserRepository;
 import com.reusebook.book.model.Book;
 import com.reusebook.book.repository.InMemoryBookRepository;
 import com.reusebook.book.service.BookService;
@@ -36,7 +37,8 @@ class OrderServiceTest {
     void setUp() {
         bookRepository = new InMemoryBookRepository();
         var orderRepository = new InMemoryOrderRepository();
-        var bookService = new BookService(bookRepository, new IsbnLookupService());
+        var userRepository = new InMemoryUserRepository();
+        var bookService = new BookService(bookRepository, new IsbnLookupService(), userRepository);
         orderService = new OrderService(orderRepository, bookService);
 
         // 创建测试书籍（含面交地址）
@@ -50,6 +52,7 @@ class OrderServiceTest {
                 "九成新",
                 "seller1@reusebook.cn",
                 "图书馆一楼大厅",
+                null,
                 Instant.now()
         );
         Book book2 = new Book(
@@ -62,6 +65,7 @@ class OrderServiceTest {
                 "全新",
                 "seller2@reusebook.cn",
                 "西门广场",
+                null,
                 Instant.now()
         );
         bookRepository.save(book1);

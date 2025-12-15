@@ -2,7 +2,7 @@
 import React, { Suspense, lazy, useState, useCallback } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AuthLayout from './components/forms/AuthLayout.jsx';
-import LandingPage from './pages/LandingPage.jsx';
+import MainLayout from './components/MainLayout.jsx';
 
 /**
  * App 主组件 - 性能优化版本
@@ -79,25 +79,27 @@ export default function App() {
   // Suspense 用于在异步加载页面时提供统一的回退提示
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route element={<AuthLayout />}>
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-        </Route>
-        <Route path="/upload" element={<UploadPage />} />
-        <Route path="/publish" element={<PublishPage />} />
-        <Route path="/books" element={<BooksPage />} />
-        <Route path="/books/:id" element={<BookDetailPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/orders/:id" element={<OrderDetailPage />} />
-        <Route path="/orders/:orderId" element={<OrderDetailPage />} />
-        <Route path="/orders/:orderId/review" element={<ReviewPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<BooksPage />} />
+          <Route element={<AuthLayout />}>
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
+          </Route>
+          <Route path="/upload" element={<UploadPage />} />
+          <Route path="/publish" element={<PublishPage />} />
+          <Route path="/books" element={<BooksPage />} />
+          <Route path="/books/:id" element={<BookDetailPage />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/:id" element={<OrderDetailPage />} />
+          <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+          <Route path="/orders/:orderId/review" element={<ReviewPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </MainLayout>
     </Suspense>
   );
 }

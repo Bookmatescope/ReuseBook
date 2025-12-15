@@ -80,7 +80,7 @@ export default function OrdersPage(){
             <Link to={`/orders/${o.id}`} key={o.id} className="order-card">
               <div className="order-row">
                 <div>
-                  <div className="order-id">订单号：{o.id.slice(0, 8)}...</div>
+                  <div className="order-id">订单号：{o.id}</div>
                   <div className="order-date">{new Date(o.createdAt).toLocaleString('zh-CN')}</div>
                   <div className="order-items-count">{o.items?.length || 0} 件商品</div>
                 </div>

@@ -2,26 +2,59 @@ package com.reusebook.book.service;
 
 import com.reusebook.book.dto.BookResponse;
 import com.reusebook.book.dto.CreateBookRequest;
+import com.reusebook.book.dto.IsbnLookupResponse;
 import com.reusebook.book.repository.InMemoryBookRepository;
 import com.reusebook.common.exception.BusinessException;
+import com.reusebook.user.repository.InMemoryUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * 书籍服务单元测试：覆盖 ISBN 查询与发布创建
+ * 使用 Mock 的 IsbnLookupService，不依赖外部 API
  */
 class BookServiceTest {
 
     private BookService bookService;
 
+    /**
+     * Mock IsbnLookupService：返回预定义数据，不依赖外部 API 配置
+     */
+    static class MockIsbnLookupService extends IsbnLookupService {
+        @Override
+        public Optional<IsbnLookupResponse> lookup(String rawIsbn) {
+            if (rawIsbn == null || rawIsbn.isBlank()) {
+                return Optional.empty();
+            }
+            String normalized = rawIsbn.replaceAll("[- ]", "").toUpperCase();
+            
+            if (normalized.length() < 10 || normalized.length() > 13) {
+                return Optional.empty();
+            }
+            
+            return switch (normalized) {
+                case "9787115428028" -> Optional.of(new IsbnLookupResponse(
+                        normalized, "深入理解计算机系统", "Randal E.Bryant",
+                        "人民邮电出版社", "2016-11", null, null, null, null, null, null));
+                case "9787111544937" -> Optional.of(new IsbnLookupResponse(
+                        normalized, "算法导论", "Thomas H.Cormen",
+                        "机械工业出版社", "2012-12", null, null, null, null, null, null));
+                default -> Optional.of(new IsbnLookupResponse(
+                        normalized, "请手动填写书名", "请手动填写作者",
+                        "未知出版社", null, null, null, null, null, null, null));
+            };
+        }
+    }
+
     @BeforeEach
     void setUp() {
-        bookService = new BookService(new InMemoryBookRepository(), new IsbnLookupService());
+        bookService = new BookService(new InMemoryBookRepository(), new MockIsbnLookupService(), new InMemoryUserRepository());
     }
 
     @Test
@@ -37,6 +70,7 @@ class BookServiceTest {
                 "seller@example.com",
                 new BigDecimal("35.6"),
                 "九成新",
+                null,
                 null,
                 null,
                 null,
@@ -65,6 +99,7 @@ class BookServiceTest {
                 "自定义书名",
                 "自定义作者",
                 "这是自定义简介",
+                null,
                 "西门广场"
         );
         var response = bookService.create(request);
@@ -81,8 +116,8 @@ class BookServiceTest {
 
     @Test
     void should_find_multiple_books_by_same_isbn() {
-        bookService.create(new CreateBookRequest("9787115428028", "seller1@example.com", new BigDecimal("30"), "九成新", null, null, null, "东门"));
-        bookService.create(new CreateBookRequest("9787115428028", "seller2@example.com", new BigDecimal("25"), "全新", null, null, null, "西门"));
+        bookService.create(new CreateBookRequest("9787115428028", "seller1@example.com", new BigDecimal("30"), "九成新", null, null, null, null, "东门"));
+        bookService.create(new CreateBookRequest("9787115428028", "seller2@example.com", new BigDecimal("25"), "全新", null, null, null, null, "西门"));
 
         var books = bookService.findByIsbn("9787115428028");
         assertThat(books).hasSize(2);
@@ -90,8 +125,8 @@ class BookServiceTest {
 
     @Test
     void should_find_all_books() {
-        bookService.create(new CreateBookRequest("9787115428028", "a@test.com", new BigDecimal("20"), "八成新", null, null, null, "图书馆"));
-        bookService.create(new CreateBookRequest("9787111544937", "b@test.com", new BigDecimal("30"), "全新", null, null, null, "食堂门口"));
+        bookService.create(new CreateBookRequest("9787115428028", "a@test.com", new BigDecimal("20"), "八成新", null, null, null, null, "图书馆"));
+        bookService.create(new CreateBookRequest("9787111544937", "b@test.com", new BigDecimal("30"), "全新", null, null, null, null, "食堂门口"));
 
         var all = bookService.findAll();
         assertThat(all).hasSize(2);
@@ -99,7 +134,7 @@ class BookServiceTest {
 
     @Test
     void should_find_book_by_id() {
-        var created = bookService.create(new CreateBookRequest("9787115428028", "seller@test.com", new BigDecimal("18"), "九成新", null, null, null, "宿舍楼下"));
+        var created = bookService.create(new CreateBookRequest("9787115428028", "seller@test.com", new BigDecimal("18"), "九成新", null, null, null, null, "宿舍楼下"));
 
         var found = bookService.findById(created.id());
         assertThat(found.isbn()).isEqualTo("9787115428028");
@@ -125,6 +160,7 @@ class BookServiceTest {
                 null,
                 null,
                 null,
+                null,
                 "教学楼A座"
         );
         var response = bookService.create(request);
@@ -141,12 +177,14 @@ class BookServiceTest {
                 null,
                 null,
                 null,
+                null,
                 "校门口"
         );
         var response = bookService.create(request);
-        assertThat(response.title()).isEqualTo("待补充书名");
-        assertThat(response.author()).isEqualTo("佚名作者");
-        assertThat(response.description()).isEqualTo("尚未填写简介");
+        // IsbnLookupService对未知ISBN返回占位信息，Create时会使用这些占位值
+        assertThat(response.title()).isEqualTo("请手动填写书名");
+        assertThat(response.author()).isEqualTo("请手动填写作者");
+        assertThat(response.description()).isEqualTo("未知出版社");
     }
 
     @Test
@@ -159,6 +197,7 @@ class BookServiceTest {
                 null,
                 null,
                 null,
+                null,
                 "南门"
         );
         var response = bookService.create(request);
@@ -167,9 +206,9 @@ class BookServiceTest {
 
     @Test
     void should_return_books_ordered_by_creation() {
-        bookService.create(new CreateBookRequest("9787115428028", "a@test.com", new BigDecimal("20"), "九成新", "书1", null, null, "地点A"));
-        bookService.create(new CreateBookRequest("9787111544937", "b@test.com", new BigDecimal("30"), "全新", "书2", null, null, "地点B"));
-        bookService.create(new CreateBookRequest("9787115428028", "c@test.com", new BigDecimal("25"), "八成新", "书3", null, null, "地点C"));
+        bookService.create(new CreateBookRequest("9787115428028", "a@test.com", new BigDecimal("20"), "九成新", "书1", null, null, null, "地点A"));
+        bookService.create(new CreateBookRequest("9787111544937", "b@test.com", new BigDecimal("30"), "全新", "书2", null, null, null, "地点B"));
+        bookService.create(new CreateBookRequest("9787115428028", "c@test.com", new BigDecimal("25"), "八成新", "书3", null, null, null, "地点C"));
 
         var all = bookService.findAll();
         assertThat(all).hasSize(3);
@@ -188,6 +227,7 @@ class BookServiceTest {
                 null,
                 null,
                 null,
+                null,
                 "操场旁边"
         );
         var response = bookService.create(request);
@@ -202,6 +242,7 @@ class BookServiceTest {
                 "seller@test.com",
                 new BigDecimal("30.00"),
                 "九成新",
+                null,
                 null,
                 null,
                 null,

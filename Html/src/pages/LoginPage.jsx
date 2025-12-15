@@ -40,8 +40,13 @@ export default function LoginPage() {
 
         const data = await response.json();
         // 将 token 与用户信息存入本地，便于后续接口鉴权
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('email', values.email);
+        localStorage.setItem('username', data.profile?.nickname || data.profile?.username || values.email);
         localStorage.setItem('reusebook_token', data.token);
         localStorage.setItem('reusebook_profile', JSON.stringify(data.profile));
+        // 触发登录状态变更事件，通知导航栏更新
+        window.dispatchEvent(new Event('loginStateChange'));
         navigate('/', { replace: true });
       } catch (err) {
         setError(err.message);

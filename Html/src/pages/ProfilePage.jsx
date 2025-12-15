@@ -124,7 +124,13 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     if (confirm('确定要退出登录吗？')) {
+      // 清除所有登录相关的存储
       localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('reusebook_token');
+      localStorage.removeItem('reusebook_profile');
+      // 触发事件通知 Navbar 更新状态
+      window.dispatchEvent(new Event('loginStateChange'));
       navigate('/login');
     }
   };
@@ -167,21 +173,21 @@ export default function ProfilePage() {
           {editing ? (
             <div className="edit-actions">
               <button 
-                className="btn-primary" 
+                className="profile-btn profile-btn-primary" 
                 onClick={handleSave}
                 disabled={saving}
               >
                 {saving ? '保存中...' : '保存'}
               </button>
               <button 
-                className="btn-secondary" 
+                className="profile-btn profile-btn-secondary" 
                 onClick={() => { setEditing(false); setNickname(profile?.nickname); }}
               >
                 取消
               </button>
             </div>
           ) : (
-            <button className="btn-secondary" onClick={() => setEditing(true)}>
+            <button className="profile-btn profile-btn-edit" onClick={() => setEditing(true)}>
               ✏️ 编辑
             </button>
           )}
@@ -189,22 +195,6 @@ export default function ProfilePage() {
         <p className="join-date">
           🗓️ 加入时间：{new Date(profile?.createdAt).toLocaleDateString('zh-CN')}
         </p>
-      </section>
-
-      {/* 统计数据 */}
-      <section className="profile-stats">
-        <div className="stat-item" onClick={() => navigate('/orders')}>
-          <span className="stat-value">{stats.orders}</span>
-          <span className="stat-label">订单</span>
-        </div>
-        <div className="stat-item" onClick={() => navigate('/publish')}>
-          <span className="stat-value">{stats.published}</span>
-          <span className="stat-label">发布</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-value">{stats.reviews}</span>
-          <span className="stat-label">评价</span>
-        </div>
       </section>
 
       {/* 功能入口 */}
@@ -215,7 +205,7 @@ export default function ProfilePage() {
           <span className="menu-arrow">›</span>
         </div>
         <div className="menu-item" onClick={() => navigate('/cart')}>
-          <span className="menu-icon">�</span>
+          <span className="menu-icon">🛒</span>
           <span className="menu-text">购物车</span>
           <span className="menu-arrow">›</span>
         </div>
@@ -225,7 +215,7 @@ export default function ProfilePage() {
           <span className="menu-arrow">›</span>
         </div>
         <div className="menu-item" onClick={() => navigate('/books')}>
-          <span className="menu-icon">�</span>
+          <span className="menu-icon">🔍</span>
           <span className="menu-text">浏览书籍</span>
           <span className="menu-arrow">›</span>
         </div>

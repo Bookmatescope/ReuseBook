@@ -29,6 +29,7 @@ export default function BookDetailPage() {
 
   // 获取登录用户信息
   const getAuthToken = () => localStorage.getItem('token');
+  const getUserEmail = () => localStorage.getItem('email');
   const isLoggedIn = () => !!getAuthToken();
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export default function BookDetailPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAuthToken()}`
         },
-        body: JSON.stringify({ bookId: id, quantity: 1 }),
+        body: JSON.stringify({ bookId: id, buyerEmail: getUserEmail(), quantity: 1 }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -98,7 +99,7 @@ export default function BookDetailPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAuthToken()}`
         },
-        body: JSON.stringify({ bookId: id, quantity: 1 }),
+        body: JSON.stringify({ bookId: id, buyerEmail: getUserEmail(), quantity: 1 }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -120,7 +121,7 @@ export default function BookDetailPage() {
 
   return (
     <div className="book-detail-page">
-      <header className="detail-header">
+      <header className="detail-header" style={{ marginTop: '1rem' }}>
         <Link to="/books">← 返回列表</Link>
       </header>
 
@@ -158,7 +159,12 @@ export default function BookDetailPage() {
           {/* 卖家信息 */}
           <div className="seller-info">
             <span className="seller-label">卖家：</span>
-            <span className="seller-name">{book.sellerNickname || book.sellerEmail}</span>
+            {/* 昵称（邮箱） */}
+            <span className="seller-name">
+              {book.sellerNickname && book.sellerEmail 
+                ? `${book.sellerNickname}(${book.sellerEmail})`
+                : book.sellerNickname || book.sellerEmail}
+            </span>
           </div>
 
           {/* 面交地址信息 */}

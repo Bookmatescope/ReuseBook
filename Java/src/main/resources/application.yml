@@ -11,12 +11,66 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 6MB
+  
+  # 数据库配置 - 使用H2文件数据库，数据持久化到磁盘
+  datasource:
+    url: jdbc:h2:file:./data/reusebook;DB_CLOSE_DELAY=-1;MODE=MYSQL;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  # H2控制台（开发调试用）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+  
+  # 数据库初始化（仅首次运行时执行）
+  sql:
+    init:
+      mode: embedded
+
 logging:
   level:
     root: info
     com.reusebook: debug
+    org.hibernate.SQL: debug
 
 reusebook:
   storage:
     image-dir: ${REUSEBOOK_IMAGE_DIR:uploads}
     public-url-prefix: /uploads/
+  isbn:
+    api-key: ${ISBN_API_KEY:}  # 探数 ISBN API 密钥，从环境变量读取
+
+---
+# MySQL生产环境配置（激活方式：--spring.profiles.active=mysql）
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    url: jdbc:mysql://localhost:3306/reusebook?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  h2:
+    console:
+      enabled: false

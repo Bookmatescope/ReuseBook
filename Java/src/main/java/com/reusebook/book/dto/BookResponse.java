@@ -16,7 +16,9 @@ public record BookResponse(
         BigDecimal price,
         String condition,
         String sellerEmail,
+        String sellerNickname,  // 卖家昵称
         String meetupLocation,  // 面交地址
+        String coverUrl,        // 封面图片URL
         Instant createdAt
 ) {
 }

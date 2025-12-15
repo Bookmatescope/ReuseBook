@@ -30,6 +30,7 @@ public record CreateBookRequest(
         String title,
         String author,
         String description,
+        String coverUrl,  // 封面图片URL
 
         @NotBlank(message = "面交地址不能为空")
         String meetupLocation  // 面交地址（卖家提供，如"西门广场"、"图书馆一楼"）

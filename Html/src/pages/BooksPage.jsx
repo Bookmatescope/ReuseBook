@@ -53,8 +53,14 @@ export default function BooksPage() {
 
   return (
     <div className="books-page">
+      {/* 主题横幅区域 */}
+      <section className="hero-banner">
+        <h1 className="hero-title">书海拾贝 · 让每本书继续旅程</h1>
+        <p className="hero-subtitle">加入校园二手书交易平台，快速发布、搜索与分享你的书籍</p>
+      </section>
+
       <header className="books-header">
-        <h1>📚 二手书市场</h1>
+        <h2>📚 二手书市场</h2>
         <Link to="/publish" className="btn btn-primary">发布二手书</Link>
       </header>
 
@@ -77,10 +83,21 @@ export default function BooksPage() {
             {paged.map((book) => (
               <li key={book.id} className="book-card">
                 <Link to={`/books/${book.id}`} className="book-link">
-                  <h3 className="book-title">{book.title}</h3>
-                  <p className="book-author">{book.author}</p>
-                  <p className="book-price">¥{book.price?.toFixed(2)}</p>
-                  <span className="book-condition">{book.condition}</span>
+                  <div className="book-cover-wrapper">
+                    {book.coverUrl ? (
+                      <img src={book.coverUrl} alt={book.title} className="book-cover" />
+                    ) : (
+                      <div className="book-cover-placeholder">
+                        <span>📖</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="book-info">
+                    <h3 className="book-title">{book.title}</h3>
+                    <p className="book-author">{book.author}</p>
+                    <p className="book-price">¥{book.price?.toFixed(2)}</p>
+                    <span className="book-condition">{book.condition}</span>
+                  </div>
                 </Link>
               </li>
             ))}
@@ -107,10 +124,6 @@ export default function BooksPage() {
           )}
         </>
       )}
-
-      <footer className="page-footer">
-        <Link to="/">← 返回首页</Link>
-      </footer>
     </div>
   );
 }
