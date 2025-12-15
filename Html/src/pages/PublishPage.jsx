@@ -1,14 +1,19 @@
 // 书籍发布页面：整合 ISBN 查询、图文表单与上传组件
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import ImageUploader from '../components/uploads/ImageUploader.jsx';
 
 const conditionOptions = ['全新', '九九新', '九成新', '八成新', '七成新'];
 
-// 获取当前登录用户邮箱
+// 获取登录Token和邮箱
+const getAuthToken = () => localStorage.getItem('token');
+const isLoggedIn = () => !!getAuthToken();
 const getUserEmail = () => localStorage.getItem('email') || '';
 
 export default function PublishPage() {
+  const navigate = useNavigate();
+  
   const {
     register,
     handleSubmit,
@@ -18,7 +23,6 @@ export default function PublishPage() {
   } = useForm({
     defaultValues: {
       isbn: '',
-      sellerEmail: getUserEmail(),  // 自动填充用户邮箱
       title: '',
       author: '',
       price: '',
@@ -29,13 +33,12 @@ export default function PublishPage() {
     }
   });
 
-  // 组件挂载时自动填充邮箱
+  // 登录验证：未登录则跳转到登录页
   useEffect(() => {
-    const email = getUserEmail();
-    if (email) {
-      setValue('sellerEmail', email);
+    if (!isLoggedIn()) {
+      navigate('/login');
     }
-  }, [setValue]);
+  }, [navigate]);
 
   const [isbnInfo, setIsbnInfo] = useState(null);
   const [isbnLoading, setIsbnLoading] = useState(false);
@@ -77,13 +80,26 @@ export default function PublishPage() {
   const onSubmit = async (values) => {
     setSubmitting(true);
     setFeedback(null);
+    
+    // 从登录信息获取邮箱
+    const sellerEmail = getUserEmail();
+    if (!sellerEmail) {
+      setFeedback({ type: 'error', text: '请先登录后再发布书籍' });
+      setSubmitting(false);
+      navigate('/login');
+      return;
+    }
+    
     try {
       const response = await fetch('/api/books', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getAuthToken()}`
+        },
         body: JSON.stringify({
           isbn: values.isbn,
-          sellerEmail: values.sellerEmail,
+          sellerEmail: sellerEmail,
           price: Number(values.price),
           condition: values.condition,
           title: values.title,
@@ -158,16 +174,6 @@ export default function PublishPage() {
               </div>
             </div>
 
-            <div className="field">
-              <label htmlFor="sellerEmail">联系邮箱</label>
-              <input
-                id="sellerEmail"
-                type="email"
-                placeholder="seller@example.com"
-                {...register('sellerEmail', { required: '请输入联系人邮箱' })}
-              />
-              {errors.sellerEmail ? <p className="field-error">{errors.sellerEmail.message}</p> : null}
-            </div>
           </section>
 
           <section>
